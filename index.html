@@ -1,764 +1,812 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MovieBox</title>
 <style>
-  :root {
-    --bg: #0b0d12;
-    --bg2: #12151d;
-    --bg3: #1a1e28;
-    --text: #f1f3f8;
-    --muted: #8d94a3;
-    --accent: #e50914;
-    --accent2: #ff2f3c;
-    --gold: #ffb300;
-    --radius: 10px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    overflow-x: hidden;
-  }
-  a { color: inherit; text-decoration: none; }
-  img { display: block; }
-  button { cursor: pointer; font-family: inherit; }
+:root{
+  --bg:#0b0d12;--bg2:#12151d;--bg3:#1a1e28;--text:#f1f3f8;--muted:#8d94a3;
+  --accent:#e50914;--accent2:#ff2f3c;--gold:#ffb300;--border:#262b37;
+}
+[data-theme="light"]{
+  --bg:#f4f5f8;--bg2:#fff;--bg3:#e9ebf0;--text:#12151d;--muted:#5c6474;--border:#d8dce4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow-x:hidden}
+button{cursor:pointer;font-family:inherit}
+img{display:block}
+input,select{font-family:inherit}
 
-  /* ── Header ── */
-  header {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(11,13,18,0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid #1f2430;
-    padding: 14px 24px;
-    display: flex; align-items: center; gap: 20px;
-    flex-wrap: wrap;
-  }
-  .logo {
-    font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
-    display: flex; align-items: center; gap: 8px;
-    cursor: pointer; user-select: none;
-  }
-  .logo .film { color: var(--accent); }
-  nav {
-    display: flex; gap: 4px; flex: 1;
-    overflow-x: auto; scrollbar-width: none;
-  }
-  nav::-webkit-scrollbar { display: none; }
-  .nav-btn {
-    background: transparent; border: 0; color: var(--muted);
-    padding: 8px 16px; border-radius: 20px; font-size: 14px;
-    font-weight: 600; white-space: nowrap; transition: all .15s;
-  }
-  .nav-btn:hover { color: var(--text); background: var(--bg3); }
-  .nav-btn.active { background: var(--accent); color: #fff; }
-  .nav-btn.adult { color: var(--gold); }
-  .nav-btn.adult.active { background: var(--gold); color: #111; }
+header{position:sticky;top:0;z-index:100;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:13px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.logo{font-size:21px;font-weight:800;cursor:pointer;display:flex;gap:8px;align-items:center;white-space:nowrap}
+.logo .film{color:var(--accent)}
+nav{display:flex;gap:4px;flex:1;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+.nav-btn{background:transparent;border:0;color:var(--muted);padding:8px 15px;border-radius:20px;font-size:14px;font-weight:600;white-space:nowrap;transition:.15s}
+.nav-btn:hover{color:var(--text);background:var(--bg3)}
+.nav-btn.active{background:var(--accent);color:#fff}
+.nav-btn.adult{color:var(--gold)}
+.nav-btn.adult.active{background:var(--gold);color:#111}
+.search-\boxed{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);padding:8px 14px;border-radius:22px;min-width:200px;max-width:300px;flex:0 1 300px}
+.search-box input{background:transparent;border:0;outline:none;color:var(--text);font-size:14px;flex:1;min-width:70px}
+.icon-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:50%;font-size:16px}
+.icon-btn:hover{background:var(--bg3)}
 
-  .search-box {
-    display: flex; align-items: center; gap: 8px;
-    background: var(--bg2); border: 1px solid #262b37;
-    padding: 8px 14px; border-radius: 22px;
-    min-width: 220px; max-width: 320px; flex: 0 1 320px;
-  }
-  .search-box input {
-    background: transparent; border: 0; outline: none;
-    color: var(--text); font-size: 14px; flex: 1;
-    min-width: 80px;
-  }
-  .search-box .icon { color: var(--muted); font-size: 15px; }
+main{padding:22px;max-width:1440px;margin:0 auto}
+.section-title{font-size:19px;font-weight:700;margin:26px 0 15px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.section-title .dot{width:6px;height:21px;background:var(--accent);border-radius:3px}
+.section-title .sub{font-size:12px;color:var(--muted);font-weight:500;margin-left:auto}
 
-  /* ── Main Layout ── */
-  main { padding: 24px; max-width: 1400px; margin: 0 auto; }
-  .section-title {
-    font-size: 20px; font-weight: 700;
-    margin: 28px 0 18px;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .section-title .dot { width: 6px; height: 22px; background: var(--accent); border-radius: 3px; }
+/* hero */
+.hero{position:relative;border-radius:16px;overflow:hidden;height:390px;background:var(--bg3);margin-bottom:10px}
+.hero-slide{position:absolute;inset:0;opacity:0;transition:opacity .7s;background-size:cover;background-position:center}
+.hero-slide.active{opacity:1}
+.hero-slide::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,13,18,.95) 0%,rgba(11,13,18,.55) 55%,rgba(11,13,18,.15) 100%)}
+.hero-info{position:absolute;left:0;bottom:0;z-index:2;padding:32px;max-width:620px}
+.hero-info h1{font-size:36px;line-height:1.12;margin-bottom:10px}
+.hero-info p{color:#cfd4de;font-size:14px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.hero-meta{display:flex;gap:12px;align-items:center;margin-bottom:12px;font-size:13px;color:#cfd4de;flex-wrap:wrap}
+.hero-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.hero-dots{position:absolute;right:22px;bottom:22px;z-index:3;display:flex;gap:7px}
+.hero-dots span{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer}
+.hero-dots span.on{background:var(--accent);width:24px;border-radius:5px}
 
-  /* ── Category Pills ── */
-  .pills {
-    display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px;
-    scrollbar-width: none;
-  }
-  .pills::-webkit-scrollbar { display: none; }
-  .pill {
-    background: var(--bg3); border: 1px solid #262b37; color: var(--text);
-    padding: 8px 16px; border-radius: 20px; font-size: 13px;
-    font-weight: 600; white-space: nowrap; transition: all .15s;
-  }
-  .pill:hover { border-color: var(--accent); color: var(--accent2); }
-  .pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .pill.adult.active { background: var(--gold); color: #111; border-color: var(--gold); }
+.btn{padding:11px 22px;border-radius:24px;font-size:14px;font-weight:700;border:0;display:inline-flex;gap:8px;align-items:center}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.28)}
+.btn-ghost:hover{background:rgba(255,255,255,.24)}
 
-  /* ── Movie Grid ── */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 16px;
-  }
-  .card {
-    background: var(--bg2); border-radius: var(--radius);
-    overflow: hidden; cursor: pointer; transition: all .18s;
-    border: 1px solid #1c2029;
-  }
-  .card:hover { transform: translateY(-4px); border-color: var(--accent); }
-  .card .poster {
-    width: 100%; aspect-ratio: 2/3;
-    object-fit: cover; background: var(--bg3);
-  }
-  .card.adult .poster { aspect-ratio: 16/10; }
-  .card .info { padding: 10px 12px; }
-  .card .title {
-    font-size: 13px; font-weight: 600;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .card .meta {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: 6px; color: var(--muted); font-size: 11px;
-  }
-  .card .rating { color: var(--gold); font-weight: 700; }
-  .card .dur {
-    background: rgba(0,0,0,0.75); color: #fff;
-    padding: 2px 8px; border-radius: 10px;
-    font-size: 10px; font-weight: 700;
-  }
-  .card .play-overlay {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,0.5); display: flex;
-    align-items: center; justify-content: center;
-    opacity: 0; transition: opacity .18s;
-  }
-  .card .play-overlay span {
-    width: 56px; height: 56px; border-radius: 50%;
-    background: var(--accent); display: flex;
-    align-items: center; justify-content: center;
-    font-size: 22px; color: #fff;
-  }
-  .card .poster-wrap { position: relative; }
-  .card:hover .play-overlay { opacity: 1; }
+/* rows */
+.row{display:flex;gap:14px;overflow-x:auto;padding:6px 2px 16px;scrollbar-width:thin}
+.row::-webkit-scrollbar{height:7px}
+.row::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.row .card{flex:0 0 172px}
+.rank{position:absolute;left:-6px;top:-6px;z-index:2;font-size:64px;font-weight:900;color:var(--text);-webkit-text-stroke:3px var(--accent);text-shadow:0 4px 16px rgba(0,0,0,.6);line-height:1}
 
-  /* ── Skeletons ── */
-  .skeleton {
-    background: linear-gradient(90deg, var(--bg2), var(--bg3), var(--bg2));
-    background-size: 200% 100%;
-    animation: shimmer 1.2s infinite;
-  }
-  @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-  .sk-poster { width: 100%; aspect-ratio: 2/3; border-radius: var(--radius); }
-  .sk-line { height: 12px; border-radius: 4px; margin-top: 10px; }
+/* grid + cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+.card{background:var(--bg2);border-radius:10px;overflow:hidden;cursor:pointer;transition:.18s;border:1px solid var(--border);position:relative}
+.card:hover{transform:translateY(-4px);border-color:var(--accent)}
+.poster-wrap{position:relative}
+.card .poster{width:100%;aspect-ratio:2/3;object-fit:cover;background:var(--bg3)}
+.card.adult .poster{aspect-ratio:16/10}
+.play-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:.18s}
+.play-overlay span{width:54px;height:54px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:21px;color:#fff}
+.card:hover .play-overlay{opacity:1}
+.badge{position:absolute;bottom:8px;left:8px;display:flex;gap:6px;flex-wrap:wrap;z-index:2}
+.badge b{background:rgba(0,0,0,.78);color:#fff;padding:3px 9px;border-radius:11px;font-size:10.5px;font-weight:700}
+.badge b.gold{background:var(--gold);color:#111}
+.card .info{padding:10px 12px}
+.card .title{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .meta{display:flex;justify-content:space-between;align-items:center;margin-top:6px;color:var(--muted);font-size:11px;gap:8px}
+.card .rating{color:var(--gold);font-weight:700}
+.fav-btn{position:absolute;top:8px;right:8px;z-index:3;background:rgba(0,0,0,.65);border:0;color:#fff;width:32px;height:32px;border-radius:50%;font-size:15px;opacity:0;transition:.15s}
+.card:hover .fav-btn{opacity:1}
+.fav-btn.on{opacity:1;color:var(--gold)}
+.progress{height:4px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:8px}
+.progress i{display:block;height:100%;background:var(--accent);border-radius:3px}
 
-  /* ── Status Messages ── */
-  .status {
-    text-align: center; padding: 60px 20px;
-    color: var(--muted); font-size: 15px;
-  }
-  .status.error {
-    color: var(--accent2);
-    background: rgba(229,9,20,0.08);
-    border: 1px solid rgba(229,9,20,0.25);
-    border-radius: 12px;
-    margin: 20px 0;
-    word-break: break-word;
-    font-family: ui-monospace, Menlo, Consolas, monospace;
-    font-size: 13px;
-    text-align: left;
-  }
-  .status .big { font-size: 42px; margin-bottom: 12px; }
+/* pills / filters */
+.pills{display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none;flex-wrap:wrap}
+.pills::-webkit-scrollbar{display:none}
+.pill{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;white-space:nowrap;transition:.15s}
+.pill:hover{border-color:var(--accent);color:var(--accent2)}
+.pill.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pill.adult.active{background:var(--gold);color:#111;border-color:var(--gold)}
+.filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0 16px}
+.filters select,.filters input{background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;outline:none}
 
-  /* ── Modal ── */
-  .modal-backdrop {
-    position: fixed; inset: 0; z-index: 200;
-    background: rgba(0,0,0,0.85);
-    display: none; align-items: center; justify-content: center;
-    padding: 20px; overflow-y: auto;
-    backdrop-filter: blur(8px);
-  }
-  .modal-backdrop.open { display: flex; }
-  .modal {
-    background: var(--bg2); border-radius: 14px;
-    width: 100%; max-width: 980px; max-height: 92vh;
-    overflow-y: auto; border: 1px solid #262b37;
-  }
-  .modal-head {
-    display: flex; justify-content: space-between;
-    align-items: flex-start; padding: 18px 22px;
-    border-bottom: 1px solid #1c2029;
-  }
-  .modal-head h2 { font-size: 22px; font-weight: 700; }
-  .modal-head .sub {
-    color: var(--muted); font-size: 13px; margin-top: 6px;
-    display: flex; gap: 12px; flex-wrap: wrap;
-  }
-  .close-btn {
-    background: var(--bg3); border: 0; color: var(--text);
-    width: 36px; height: 36px; border-radius: 50%;
-    font-size: 20px; line-height: 1;
-  }
-  .close-btn:hover { background: var(--accent); }
-  .modal-body { padding: 22px; }
-  .player-wrap {
-    width: 100%; aspect-ratio: 16/9;
-    background: #000; border-radius: 8px;
-    overflow: hidden; margin-bottom: 18px;
-  }
-  .player-wrap video, .player-wrap iframe {
-    width: 100%; height: 100%; border: 0; display: block;
-  }
-  .sources {
-    display: flex; gap: 8px; overflow-x: auto;
-    padding: 10px 0; scrollbar-width: none; flex-wrap: wrap;
-  }
-  .sources::-webkit-scrollbar { display: none; }
-  .src-btn {
-    background: var(--bg3); border: 1px solid #262b37;
-    color: var(--text); padding: 8px 14px; border-radius: 8px;
-    font-size: 12px; font-weight: 600;
-  }
-  .src-btn:hover, .src-btn.active {
-    background: var(--accent); color: #fff; border-color: var(--accent);
-  }
-  .synopsis {
-    color: var(--muted); font-size: 14px; line-height: 1.65;
-    margin: 14px 0;
-  }
-  .genres { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
-  .genre-tag {
-    background: var(--bg3); color: var(--text);
-    padding: 5px 12px; border-radius: 14px; font-size: 12px;
-    border: 1px solid #262b37;
-  }
+/* episodes */
+.ep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px;margin-top:12px;max-height:340px;overflow-y:auto;padding-right:4px}
+.ep-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;display:flex;gap:10px;padding:8px;transition:.15s}
+.ep-card:hover,.ep-card.active{border-color:var(--accent)}
+.ep-card img{width:86px;aspect-ratio:16/9;object-fit:cover;border-radius:5px;background:var(--bg2);flex-shrink:0}
+.ep-card .ep-t{font-size:12px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ep-card .ep-d{font-size:10.5px;color:var(--muted);margin-top:4px}
 
-  /* ── Episode Selector ── */
-  .ep-selector {
-    display: flex; gap: 10px; flex-wrap: wrap;
-    margin: 14px 0; align-items: center;
-  }
-  .ep-selector select {
-    background: var(--bg3); color: var(--text);
-    border: 1px solid #262b37; border-radius: 6px;
-    padding: 8px 12px; font-size: 13px; font-family: inherit;
-    outline: none; cursor: pointer;
-  }
-  .ep-list {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 8px; margin-top: 12px; max-height: 220px; overflow-y: auto;
-  }
-  .ep-btn {
-    background: var(--bg3); border: 1px solid #262b37;
-    color: var(--text); padding: 10px; border-radius: 6px;
-    font-size: 12px; font-weight: 600;
-  }
-  .ep-btn:hover, .ep-btn.active {
-    background: var(--accent); color: #fff; border-color: var(--accent);
-  }
+/* modal */
+.modal-backdrop{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.87);display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(8px)}
+.modal-backdrop.open{display:flex}
+.modal{background:var(--bg2);border-radius:14px;width:100%;max-width:1000px;border:1px solid var(--border);overflow:hidden}
+.modal-hero{height:230px;background-size:cover;background-position:center;position:relative}
+.modal-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.1),var(--bg2))}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 22px 0;position:relative;z-index:2;margin-top:-46px}
+.modal-head h2{font-size:23px;font-weight:800;text-shadow:0 2px 12px rgba(0,0,0,.8)}
+.modal-sub{color:var(--muted);font-size:13px;margin-top:8px;display:flex;gap:12px;flex-wrap:wrap}
+.close-btn{background:rgba(0,0,0,.6);border:0;color:#fff;width:36px;height:36px;border-radius:50%;font-size:19px;position:absolute;top:14px;right:14px;z-index:5}
+.close-btn:hover{background:var(--accent)}
+.modal-body{padding:18px 22px 26px}
+.player-wrap{width:100%;aspect-ratio:16/9;background:#000;border-radius:9px;overflow:hidden;position:relative}
+.player-wrap video,.player-wrap iframe{width:100%;height:100%;border:0;display:block}
+.pip-btn{position:absolute;right:12px;bottom:12px;z-index:4;background:rgba(0,0,0,.7);border:0;color:#fff;padding:8px 13px;border-radius:8px;font-size:12px;font-weight:700}
+.next-overlay{position:absolute;inset:0;background:rgba(11,13,18,.93);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:6;text-align:center;padding:20px}
+.next-overlay.show{display:flex}
+.sources{display:flex;gap:8px;overflow-x:auto;padding:12px 0;flex-wrap:wrap}
+.src-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600}
+.src-btn:hover,.src-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.synopsis{color:var(--muted);font-size:14px;line-height:1.65;margin:12px 0}
+.genres{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.genre-tag{background:var(--bg3);color:var(--text);padding:5px 12px;border-radius:14px;font-size:12px;border:1px solid var(--border)}
+.action-row{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
 
-  /* ── Age Gate ── */
-  .age-gate {
-    position: fixed; inset: 0; z-index: 999;
-    background: rgba(11,13,18,0.97);
-    display: none; align-items: center; justify-content: center;
-    flex-direction: column; padding: 20px; text-align: center;
-    backdrop-filter: blur(14px);
-  }
-  .age-gate.open { display: flex; }
-  .age-gate .warn { font-size: 72px; margin-bottom: 18px; }
-  .age-gate h2 { font-size: 30px; margin-bottom: 10px; }
-  .age-gate p { color: var(--muted); font-size: 15px; max-width: 520px; line-height: 1.6; margin-bottom: 28px; }
-  .age-gate .actions { display: flex; gap: 14px; }
-  .btn-yes, .btn-no {
-    padding: 14px 32px; border-radius: 28px;
-    font-size: 15px; font-weight: 700; border: 0;
-  }
-  .btn-yes { background: var(--gold); color: #111; }
-  .btn-yes:hover { filter: brightness(1.1); }
-  .btn-no { background: var(--bg3); color: var(--text); }
-  .btn-no:hover { background: var(--accent); color: #fff; }
+/* skeleton / status */
+.skeleton{background:linear-gradient(90deg,var(--bg2),var(--bg3),var(--bg2));background-size:200% 100%;animation:shimmer 1.2s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-poster{width:100%;aspect-ratio:2/3;border-radius:10px}
+.sk-line{height:12px;border-radius:4px;margin-top:10px}
+.status{text-align:center;padding:58px 20px;color:var(--muted);font-size:15px}
+.status.error{color:var(--accent2);background:rgba(229,9,20,.08);border:1px solid rgba(229,9,20,.25);border-radius:12px;margin:18px 0;word-break:break-word;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;text-align:left}
+.retry{margin-top:14px}
 
-  /* ── Footer ── */
-  footer {
-    padding: 36px 24px; margin-top: 50px;
-    border-top: 1px solid #1c2029;
-    color: var(--muted); text-align: center; font-size: 13px;
-  }
+/* age gate */
+.age-gate{position:fixed;inset:0;z-index:999;background:var(--bg);display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px;text-align:center;backdrop-filter:blur(14px)}
+.age-gate.open{display:flex}
+.age-gate .warn{font-size:70px;margin-bottom:16px}
+.age-gate h2{font-size:29px;margin-bottom:10px}
+.age-gate p{color:var(--muted);font-size:15px;max-width:520px;line-height:1.6;margin-bottom:26px}
+.age-gate .actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
 
-  /* ── Responsive ── */
-  @media (max-width: 720px) {
-    header { padding: 12px 14px; gap: 12px; }
-    .logo { font-size: 18px; }
-    .search-box { order: 3; flex: 1 1 100%; max-width: 100%; }
-    main { padding: 16px; }
-    .grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
-    .modal-head h2 { font-size: 18px; }
-  }
+footer{padding:34px 24px;margin-top:46px;border-top:1px solid var(--border);color:var(--muted);text-align:center;font-size:13px}
+
+@media(max-width:720px){
+  header{padding:11px 13px;gap:11px}
+  .logo{font-size:18px}
+  .search-\boxed{order:3;flex:1 1 100%;max-width:100%}
+  main{padding:14px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:11px}
+  .row .card{flex:0 0 138px}
+  .hero{height:320px}
+  .hero-info{padding:18px}
+  .hero-info h1{font-size:23px}
+  .hero-info p{-webkit-line-clamp:2}
+  .modal-head h2{font-size:18px}
+  .rank{font-size:44px}
+}
 </style>
 </head>
 <body>
 
-<!-- ── Header ──────────────────────────────────────────── -->
 <header>
-  <div class="logo" onclick="goHome()">
-    <span class="film">🎬</span> MovieBox
-  </div>
+  <div class="logo" onclick="goHome()"><span class="film">🎬</span> MovieBox</div>
   <nav>
     <button class="nav-btn active" data-tab="home" onclick="switchTab('home')">Home</button>
     <button class="nav-btn" data-tab="movies" onclick="switchTab('movies')">Movies</button>
     <button class="nav-btn" data-tab="tv" onclick="switchTab('tv')">TV Shows</button>
     <button class="nav-btn adult" data-tab="adult" onclick="switchTab('adult')">🔞 18+</button>
+    <button class="nav-btn" data-tab="list" onclick="switchTab('list')">⭐ My List</button>
   </nav>
   <div class="search-box">
-    <span class="icon">🔍</span>
+    <span>🔍</span>
     <input id="searchInput" type="text" placeholder="Search..." onkeydown="if(event.key==='Enter') doSearch()">
   </div>
+  <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
 </header>
 
-<!-- ── Main ─────────────────────────────────────────────── -->
-<main id="main">
-  <div id="content"></div>
-</main>
+<main id="main"><div id="content"></div><div id="sentinel" style="height:60px"></div></main>
 
-<footer>
-  <div>🎬 MovieBox · Built with 🍕 + Node.js · Content sourced from public APIs &amp; aggregators</div>
-</footer>
+<footer>🎬 MovieBox · streaming aggregator · content sourced from public APIs &amp; embed providers</footer>
 
-<!-- ── Detail Modal ────────────────────────────────────── -->
 <div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this) closeModal()">
   <div class="modal">
+    <div class="modal-hero" id="modalHero"></div>
+    <button class="close-btn" onclick="closeModal()">✕</button>
     <div class="modal-head">
       <div>
         <h2 id="modalTitle">—</h2>
-        <div class="sub" id="modalSub"></div>
+        <div class="modal-sub" id="modalSub"></div>
       </div>
-      <button class="close-btn" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="player-wrap" id="playerWrap"></div>
+      <div class="player-wrap" id="playerWrap">
+        <div class="next-overlay" id="nextOverlay">
+          <div style="font-size:40px">⏭</div>
+          <h3 id="nextLabel">Next episode</h3>
+          <div style="color:var(--muted)" id="nextCount">5</div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary" onclick="playNextNow()">Play now</button>
+            <button class="btn btn-ghost" onclick="cancelNext()">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div class="action-row" id="actionRow"></div>
       <div class="sources" id="sourcesRow"></div>
-      <div class="ep-selector" id="epSelector"></div>
-      <div class="ep-list" id="epList"></div>
+      <div class="filters" id="epSelector"></div>
+      <div class="ep-grid" id="epList"></div>
       <div class="genres" id="modalGenres"></div>
       <p class="synopsis" id="modalSynopsis"></p>
     </div>
   </div>
 </div>
 
-<!-- ── Age Gate ────────────────────────────────────────── -->
+<div class="modal-backdrop" id="trailerModal" onclick="if(event.target===this) closeTrailer()">
+  <div class="modal" style="max-width:900px">
+    <div style="position:relative">
+      <button class="close-btn" onclick="closeTrailer()">✕</button>
+      <div class="player-wrap" id="trailerWrap" style="border-radius:14px 14px 0 0"></div>
+    </div>
+  </div>
+</div>
+
 <div class="age-gate" id="ageGate">
   <div class="warn">🔞</div>
   <h2>Are you 18 or older?</h2>
   <p>This section contains adult content. By entering you confirm you are of legal age to view explicit material in your jurisdiction.</p>
   <div class="actions">
-    <button class="btn-yes" onclick="enterAdult()">Yes, I'm 18+</button>
-    <button class="btn-no" onclick="leaveAdult()">No, take me back</button>
+    <button class="btn" style="background:var(--gold);color:#111" onclick="enterAdult()">Yes, I'm 18+</button>
+    <button class="btn" style="background:var(--bg3);color:var(--text)" onclick="leaveAdult()">No, take me back</button>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════
-//  State
-// ═══════════════════════════════════════════════════════════
-let currentTab = 'home';
-let currentGenre = null;
-let currentAdultCat = null;
-let adultUnlocked = localStorage.getItem('mbx_age_ok') === '1';
+// ═══ State ═══════════════════════════════════════════════════
+const $ = (s, r = document) => r.querySelector(s);
+const LS = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+};
+let tab = 'home', genre = null, adultCat = 'trending', adultSource = 'all', query = '';
+let pageNo = 1, allItems = [], loading = false, exhausted = false, sortMode = 'pop';
+let myMovies = LS.get('mbx_list', []), myContinue = LS.get('mbx_continue', []);
+let adultUnlocked = LS.get('mbx_age_ok', 0) === 1;
+let nextInfo = null, nextTimer = null, currentEp = null;
 
-// ═══════════════════════════════════════════════════════════
-//  Fetch helpers — EVERY URL matched to live server.js
-// ═══════════════════════════════════════════════════════════
+// theme
+const savedTheme = LS.get('mbx_theme', 'dark');
+document.documentElement.dataset.theme = savedTheme;
+updateThemeBtn();
+function toggleTheme() {
+  const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = t;
+  LS.set('mbx_theme', t);
+  updateThemeBtn();
+}
+function updateThemeBtn() { $('#themeBtn').textContent = document.documentElement.dataset.theme === 'dark' ? '🌙' : '☀️'; }
+
+// ═══ Fetch ══════════════════════════════════════════════════
 async function api(url) {
-  try {
-    const r = await fetch(url);
-    const ct = r.headers.get('content-type') || '';
-    if (!ct.includes('application/json')) {
-      throw new Error(`${url} returned non-JSON (likely HTML fallback). Status ${r.status}.`);
-    }
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error || `HTTP ${r.status} on ${url}`);
-    return data;
-  } catch (e) {
-    throw new Error(`GET ${url} → ${e.message}`);
-  }
+  const r = await fetch(url);
+  const ct = r.headers.get('content-type') || '';
+  if (!ct.includes('application/json')) throw new Error(`${url} → non-JSON response (status ${r.status})`);
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || `HTTP ${r.status} on ${url}`);
+  return d;
+}
+const list = (d) => Array.isArray(d?.results) ? d.results : [];
+
+// ═══ Cards / rows ═══════════════════════════════════════════
+function cardHTML(it, opts = {}) {
+  const poster = it.poster || it.thumbnail || it.image || 'https://placehold.co/300x450/12151d/8d94a3?text=No+Poster';
+  const title = String(it.title || it.name || 'Untitled').replace(/"/g, '&quot;');
+  const inList = myMovies.some(m => String(m.id) === String(it.id));
+  const cont = myContinue.find(c => String(c.id) === String(it.id) && c.progress > 1 && c.progress < 98);
+  const data = { id: it.id, title: it.title || it.name, poster, adult: opts.adult ? 1 : 0, source: it.source || '', tv: opts.tv ? 1 : 0 };
+  return `
+  <div class="card ${opts.adult ? 'adult' : ''}" onclick='openDetail(${JSON.stringify(data).replace(/'/g, "&#39;")})'>
+    <div class="poster-wrap">
+      ${opts.rank ? `<div class="rank">${opts.rank}</div>` : ''}
+      <img class="poster" src="${poster}" alt="${title}" loading="lazy"
+           onerror="this.src='https://placehold.co/300x450/12151d/8d94a3?text=No+Poster'">
+      <div class="play-overlay"><span>▶</span></div>
+      <button class="fav-btn ${inList ? 'on' : ''}" onclick="event.stopPropagation();toggleFav(${JSON.stringify(data).replace(/"/g, '&quot;').replace(/'/g, "&#39;")})">${inList ? '★' : '☆'}</button>
+      <div class="badge">
+        ${it.duration ? `<b>⏱ ${it.duration}</b>` : ''}
+        ${it.views ? `<b>👁 ${it.views}</b>` : ''}
+        ${it.rating ? `<b class="gold">★ ${it.rating}</b>` : ''}
+      </div>
+    </div>
+    <div class="info">
+      <div class="title" title="${title}">${title}</div>
+      <div class="meta"><span>${it.year || it.source || ''}</span></div>
+      ${cont ? `<div class="progress"><i style="width:${Math.min(100, cont.progress)}%"></i></div>` : ''}
+    </div>
+  </div>`;
 }
 
-function gridHTML(items, adultMode = false) {
-  if (!Array.isArray(items) || items.length === 0) {
-    return `<div class="status"><div class="big">🤷</div>No results found.</div>`;
-  }
-  return `<div class="grid">${items.map(it => {
-    const poster = it.poster || it.thumbnail || it.image || 'https://placehold.co/300x450/12151d/8d94a3?text=No+Poster';
-    const title = (it.title || it.name || 'Untitled').replace(/"/g, '&quot;');
-    const meta = it.year || it.duration || it.date || '';
-    const rating = it.rating || it.score || '';
-    return `
-      <div class="card ${adultMode ? 'adult' : ''}" onclick='openDetail(${JSON.stringify({
-        id: it.id, title: it.title || it.name, source: it.source || null,
-        adult: adultMode ? 1 : 0, poster
-      }).replace(/'/g, "&#39;")})'>
-        <div class="poster-wrap">
-          <img class="poster" src="${poster}" alt="${title}" loading="lazy"
-               onerror="this.src='https://placehold.co/300x450/12151d/8d94a3?text=No+Poster'">
-          <div class="play-overlay"><span>▶</span></div>
-        </div>
-        <div class="info">
-          <div class="title" title="${title}">${title}</div>
-          <div class="meta">
-            <span>${meta}</span>
-            ${rating ? `<span class="rating">★ ${rating}</span>` : ''}
+function rowHTML(title, items, opts = {}) {
+  if (!items.length) return '';
+  return `<div class="section-title"><div class="dot"></div>${title}${opts.sub ? `<span class="sub">${opts.sub}</span>` : ''}</div>
+    <div class="row">${items.map((it, i) => cardHTML(it, { ...opts, rank: opts.ranked ? i + 1 : 0 })).join('')}</div>`;
+}
+
+function gridHTML(items, opts = {}) {
+  if (!items.length) return `<div class="status"><div style="font-size:42px;margin-bottom:10px">🤷</div>No results found.</div>`;
+  return `<div class="grid">${items.map(it => cardHTML(it, opts)).join('')}</div>`;
+}
+
+const skeletonHTML = (n = 12) => `<div class="grid">${Array.from({ length: n }, () =>
+  `<div><div class="sk-poster skeleton"></div><div class="sk-line skeleton"></div><div class="sk-line skeleton" style="width:60%"></div></div>`).join('')}</div>`;
+
+const errorHTML = (msg, retry = 'render()') => `
+  <div class="status error"><strong>⚠️ Failed to load</strong><br><br>${msg}
+  <div class="retry"><button class="btn btn-primary" onclick="${retry}">↻ Retry</button></div></div>`;
+
+// ═══ Hero ═══════════════════════════════════════════════════
+function heroHTML(items) {
+  const top = items.filter(i => i.backdrop).slice(0, 5);
+  if (!top.length) return '';
+  return `<div class="hero" id="hero">
+    ${top.map((it, i) => `
+      <div class="hero-slide ${i === 0 ? 'active' : ''}" data-i="${i}" style="background-image:url('${it.backdrop}')">
+        <div class="hero-info">
+          <div class="hero-meta">
+            ${it.rating ? `<span class="rating" style="color:var(--gold);font-weight:700">★ ${it.rating}</span>` : ''}
+            ${it.year ? `<span>📅 ${it.year}</span>` : ''}
+            <span style="background:var(--accent);padding:2px 9px;border-radius:9px;font-size:11px;font-weight:700">HD</span>
+          </div>
+          <h1>${it.title}</h1>
+          <p>${it.overview || ''}</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" onclick='openDetail(${JSON.stringify({ id: it.id, title: it.title, poster: it.poster }).replace(/'/g, "&#39;")})'>▶ Watch Now</button>
+            <button class="btn btn-ghost" onclick="openTrailer('${it.id}')">▶ Trailer</button>
+            <button class="btn btn-ghost" onclick='toggleFav(${JSON.stringify({ id: it.id, title: it.title, poster: it.poster }).replace(/'/g, "&#39;")})'>＋ My List</button>
           </div>
         </div>
-      </div>`;
-  }).join('')}</div>`;
+      </div>`).join('')}
+    <div class="hero-dots">${top.map((_, i) => `<span class="${i === 0 ? 'on' : ''}" onclick="heroGo(${i})"></span>`).join('')}</div>
+  </div>`;
+}
+let heroIdx = 0, heroTimer = null, heroCount = 0;
+function heroStart() {
+  clearInterval(heroTimer);
+  const slides = document.querySelectorAll('.hero-slide');
+  heroCount = slides.length;
+  if (heroCount < 2) return;
+  heroTimer = setInterval(() => heroGo((heroIdx + 1) % heroCount), 6500);
+}
+function heroGo(i) {
+  heroIdx = i;
+  document.querySelectorAll('.hero-slide').forEach((s, k) => s.classList.toggle('active', k === i));
+  document.querySelectorAll('.hero-dots span').forEach((d, k) => d.classList.toggle('on', k === i));
 }
 
-function skeletonHTML(n = 12) {
-  return `<div class="grid">${Array.from({length: n}, () => `
-    <div><div class="sk-poster skeleton"></div><div class="sk-line skeleton"></div><div class="sk-line skeleton" style="width:60%"></div></div>
-  `).join('')}</div>`;
-}
-
-function errorHTML(msg) {
-  return `<div class="status error"><strong>⚠️ Failed to load</strong><br><br>${msg}</div>`;
-}
-
-// ═══════════════════════════════════════════════════════════
-//  Tabs
-// ═══════════════════════════════════════════════════════════
-function switchTab(tab) {
-  if (tab === 'adult' && !adultUnlocked) {
-    document.getElementById('ageGate').classList.add('open');
-    return;
-  }
-  currentTab = tab;
-  currentGenre = null;
-  currentAdultCat = null;
-  document.querySelectorAll('.nav-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.tab === tab);
-  });
+// ═══ Tabs / render ══════════════════════════════════════════
+function switchTab(t) {
+  if (t === 'adult' && !adultUnlocked) { $('#ageGate').classList.add('open'); return; }
+  tab = t; genre = null; adultCat = 'trending'; query = '';
+  $('#searchInput').value = '';
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
   render();
 }
-
-function goHome() {
-  document.getElementById('searchInput').value = '';
-  switchTab('home');
-}
+function goHome() { switchTab('home'); }
 
 async function render() {
-  const el = document.getElementById('content');
+  clearInterval(heroTimer);
+  const el = $('#content');
   el.innerHTML = skeletonHTML(12);
+  allItems = []; pageNo = 1; exhausted = false; sortMode = 'pop';
   try {
-    if (currentTab === 'home' || currentTab === 'movies') {
-      await renderMovies(el);
-    } else if (currentTab === 'tv') {
-      await renderTV(el);
-    } else if (currentTab === 'adult') {
-      await renderAdult(el);
-    }
-  } catch (e) {
-    el.innerHTML = errorHTML(e.message);
-  }
+    if (tab === 'home') await renderHome(el);
+    else if (tab === 'movies') await renderMovies(el);
+    else if (tab === 'tv') await renderTV(el);
+    else if (tab === 'adult') await renderAdult(el);
+    else if (tab === 'list') renderMyList(el);
+  } catch (e) { el.innerHTML = errorHTML(e.message); }
 }
 
-// ═══════════════════════════════════════════════════════════
-//  MOVIES  — endpoints: /api/movies/*
-// ═══════════════════════════════════════════════════════════
-const MOVIE_GENRES = [
-  ['all','All'], ['action','Action'], ['comedy','Comedy'], ['horror','Horror'],
-  ['romance','Romance'], ['sci-fi','Sci-Fi'], ['thriller','Thriller'], ['drama','Drama'],
-  ['animation','Animation'], ['fantasy','Fantasy'], ['adventure','Adventure'], ['crime','Crime']
-];
+// ── HOME ─────────────────────────────────────────────────────
+async function renderHome(el) {
+  const [trend, trend2, tv, adultRow] = await Promise.all([
+    api('/api/movies/trending?page=1'),
+    api('/api/movies/trending?page=2').catch(() => ({ results: [] })),
+    api('/api/tv/trending?page=1').catch(() => ({ results: [] })),
+    adultUnlocked ? api('/api/adult/trending?page=1').catch(() => ({ results: [] })) : Promise.resolve({ results: [] })
+  ]);
+  const items = list(trend), more = list(trend2);
+  allItems = items;
+  el.innerHTML = heroHTML(items);
+  const recent = [...more].sort((a, b) => (b.year || '').localeCompare(a.year || ''));
+  el.insertAdjacentHTML('beforeend',
+    rowHTML('▶ Continue Watching', myContinue.slice(0, 12), {}) +
+    rowHTML('🏆 Top 10 This Week', items.slice(0, 10), { ranked: true }) +
+    `<div class="section-title"><div class="dot"></div>Trending Now<span class="sub">auto-scroll to load more</span></div><div class="grid" id="mainGrid">${items.map(it => cardHTML(it)).join('')}</div>` +
+    rowHTML('🕐 Recently Added', recent.slice(0, 12), {}) +
+    rowHTML('📺 Popular TV Shows', list(tv).slice(0, 12), { tv: true }) +
+    (adultUnlocked ? rowHTML('🔞 Trending 18+', list(adultRow).slice(0, 12), { adult: true }) : '')
+  );
+  heroStart();
+  allItems = [...items, ...more];
+  setupInfinite('movies');
+}
+
+// ── MOVIES ───────────────────────────────────────────────────
+const MOVIE_GENRES = [['all','All'],['action','Action'],['comedy','Comedy'],['horror','Horror'],['romance','Romance'],['sci-fi','Sci-Fi'],['thriller','Thriller'],['drama','Drama'],['animation','Animation'],['fantasy','Fantasy'],['adventure','Adventure'],['crime','Crime']];
 
 async function renderMovies(el) {
-  const pillsHTML = `<div class="pills">${MOVIE_GENRES.map(([k, label]) => `
-    <button class="pill ${currentGenre === k ? 'active' : ''}"
-            onclick="selectMovieGenre('${k}')">${label}</button>
-  `).join('')}</div>`;
+  const pills = `<div class="pills">${MOVIE_GENRES.map(([k, l]) =>
+    `<button class="pill ${genre === k ? 'active' : ''}" onclick="selectGenre('${k}')">${l}</button>`).join('')}</div>`;
+  el.innerHTML = pills + filterBarHTML() + `<div class="grid" id="mainGrid">${''}</div>`;
+  await loadPage();
+  setupInfinite('movies');
+}
+function selectGenre(g) { genre = (genre === g || g === 'all') ? null : g; render(); }
 
-  let data;
-  if (currentGenre && currentGenre !== 'all') {
-    // /api/movies/genre/:name
-    data = await api(`/api/movies/genre/${encodeURIComponent(currentGenre)}`);
-    el.innerHTML = `<div class="section-title"><div class="dot"></div>Genre · ${currentGenre.toUpperCase()}</div>${pillsHTML}`;
-    el.insertAdjacentHTML('beforeend', gridHTML(data.results || []));
-  } else {
-    // /api/movies/trending
-    data = await api('/api/movies/trending');
-    el.innerHTML = `<div class="section-title"><div class="dot"></div>Trending Now</div>${pillsHTML}`;
-    el.insertAdjacentHTML('beforeend', gridHTML(data.results || []));
-  }
+function filterBarHTML() {
+  return `<div class="filters">
+    <select onchange="setSort(this.value)">
+      <option value="pop">Sort: Popularity</option>
+      <option value="rating">Sort: Rating</option>
+      <option value="year">Sort: Newest</option>
+      <option value="title">Sort: A–Z</option>
+    </select>
+    <span style="color:var(--muted);font-size:12px" id="filterCount"></span>
+  </div>`;
+}
+function setSort(v) {
+  sortMode = v;
+  const sorted = sortItems(allItems);
+  const g = $('#mainGrid');
+  if (g) g.innerHTML = sorted.map(it => cardHTML(it, { adult: tab === 'adult', tv: tab === 'tv' })).join('');
 }
 
-function selectMovieGenre(genre) {
-  currentGenre = currentGenre === genre ? null : genre;
-  render();
+function sortItems(arr) {
+  const a = [...arr];
+  if (sortMode === 'rating') a.sort((x, y) => (y.rating || 0) - (x.rating || 0));
+  else if (sortMode === 'year') a.sort((x, y) => String(y.year || '').localeCompare(String(x.year || '')));
+  else if (sortMode === 'title') a.sort((x, y) => String(x.title || '').localeCompare(String(y.title || '')));
+  return a;
 }
 
-// ═══════════════════════════════════════════════════════════
-//  TV  — endpoints: /api/tv/*
-// ═══════════════════════════════════════════════════════════
+async function loadPage() {
+  if (loading || exhausted) return;
+  loading = true;
+  const grid = $('#mainGrid');
+  if (grid) grid.insertAdjacentHTML('beforeend', `<div id="loadingMore" style="grid-column:1/-1">${skeletonHTML(6)}</div>`);
+  try {
+    let url;
+    if (query) url = tab === 'adult'
+      ? `/api/adult/search?q=${encodeURIComponent(query)}&source=${adultSource}&page=${pageNo}`
+      : tab === 'tv' ? `/api/tv/search?q=${encodeURIComponent(query)}&page=${pageNo}`
+      : `/api/movies/search?q=${encodeURIComponent(query)}&page=${pageNo}`;
+    else if (tab === 'adult') url = (adultCat && adultCat !== 'trending')
+      ? `/api/adult/category/${encodeURIComponent(adultCat)}?source=${adultSource}&page=${pageNo}`
+      : `/api/adult/trending?source=${adultSource}&page=${pageNo}`;
+    else if (tab === 'tv') url = `/api/tv/trending?page=${pageNo}`;
+    else if (genre) url = `/api/movies/genre/${encodeURIComponent(genre)}?page=${pageNo}`;
+    else url = `/api/movies/trending?page=${pageNo}`;
+
+    const items = list(await api(url));
+    if (!items.length) exhausted = true;
+    allItems = [...allItems, ...items];
+    const html = items.map(it => cardHTML(it, { adult: tab === 'adult', tv: tab === 'tv' })).join('');
+    if (grid) {
+      $('#loadingMore')?.remove();
+      grid.insertAdjacentHTML('beforeend', html);
+      const fc = $('#filterCount');
+      if (fc) fc.textContent = `${allItems.length} titles loaded`;
+    }
+    pageNo++;
+  } catch (e) {
+    $('#loadingMore')?.remove();
+    if (grid) grid.insertAdjacentHTML('beforeend', errorHTML(e.message, `loadPage()`));
+    exhausted = true;
+  } finally { loading = false; }
+}
+
+function setupInfinite() {
+  const sentinel = $('#sentinel');
+  const io = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && $('#mainGrid') && !query === false || entries[0].isIntersecting) loadPage();
+  }, { rootMargin: '600px' });
+  io.disconnect && io.disconnect();
+  window.__io && window.__io.disconnect();
+  window.__io = io;
+  io.observe(sentinel);
+}
+
+// ── TV ───────────────────────────────────────────────────────
 async function renderTV(el) {
-  // /api/tv/trending
-  const data = await api('/api/tv/trending');
-  el.innerHTML = `<div class="section-title"><div class="dot"></div>Popular TV Shows</div>`;
-  el.insertAdjacentHTML('beforeend', gridHTML(data.results || []));
+  el.innerHTML = filterBarHTML() + `<div class="grid" id="mainGrid"></div>`;
+  await loadPage();
+  setupInfinite();
 }
 
-// ═══════════════════════════════════════════════════════════
-//  ADULT  — endpoints: /api/adult/*
-// ═══════════════════════════════════════════════════════════
-const ADULT_CATS = [
-  ['all','🔥 Trending'], ['trending','🔥 Trending'], ['popular','⭐ Popular'], ['new','🆕 New'],
-  ['amateur','Amateur'], ['anal','Anal'], ['asian','Asian'], ['bbw','BBW'],
-  ['big-tits','Big Tits'], ['blonde','Blonde'], ['blowjob','Blowjob'], ['brunette','Brunette'],
-  ['ebony','Ebony'], ['latina','Latina'], ['lesbian','Lesbian'], ['mature','Mature'],
-  ['milf','MILF'], ['teen','Teen'], ['threesome','Threesome'], ['toys','Toys']
-];
+// ── ADULT ────────────────────────────────────────────────────
+const ADULT_CATS = [['trending','🔥 Trending'],['popular','⭐ Popular'],['new','🆕 New'],['amateur','Amateur'],['anal','Anal'],['asian','Asian'],['bbw','BBW'],['big-tits','Big Tits'],['blonde','Blonde'],['blowjob','Blowjob'],['brunette','Brunette'],['ebony','Ebony'],['latina','Latina'],['lesbian','Lesbian'],['mature','Mature'],['milf','MILF'],['teen','Teen'],['threesome','Threesome'],['toys','Toys']];
+const ADULT_SOURCES = [['all','All Sources'],['xvideos','XVideos'],['xnxx','XNXX'],['spankbang','SpankBang'],['eporner','EPorner'],['redtube','RedTube']];
 
 async function renderAdult(el) {
-  const pillsHTML = `<div class="pills">${ADULT_CATS.map(([k, label]) => `
-    <button class="pill adult ${currentAdultCat === k ? 'active' : ''}"
-            onclick="selectAdultCat('${k}')">${label}</button>
-  `).join('')}</div>`;
-
-  let data;
-  if (currentAdultCat && currentAdultCat !== 'all' && currentAdultCat !== 'trending') {
-    // /api/adult/category/:name
-    data = await api(`/api/adult/category/${encodeURIComponent(currentAdultCat)}`);
-    el.innerHTML = `<div class="section-title"><div class="dot"></div>🔞 ${currentAdultCat.toUpperCase()}</div>${pillsHTML}`;
-    el.insertAdjacentHTML('beforeend', gridHTML(data.results || [], true));
-  } else {
-    // /api/adult/trending
-    data = await api('/api/adult/trending');
-    el.innerHTML = `<div class="section-title"><div class="dot"></div>🔞 Trending Now</div>${pillsHTML}`;
-    el.insertAdjacentHTML('beforeend', gridHTML(data.results || [], true));
-  }
+  el.innerHTML = `
+    <div class="pills">${ADULT_SOURCES.map(([k, l]) =>
+      `<button class="pill adult ${adultSource === k ? 'active' : ''}" onclick="setAdultSource('${k}')">${l}</button>`).join('')}</div>
+    <div class="pills">${ADULT_CATS.map(([k, l]) =>
+      `<button class="pill adult ${adultCat === k ? 'active' : ''}" onclick="selectAdultCat('${k}')">${l}</button>`).join('')}</div>
+    <div class="filters">
+      <input id="perfInput" placeholder="Search performer / pornstar..." style="min-width:230px"
+             onkeydown="if(event.key==='Enter') searchPerformer()">
+      <button class="btn btn-primary" onclick="searchPerformer()">Find performer</button>
+    </div>
+    <div class="grid" id="mainGrid"></div>`;
+  await loadPage();
+  setupInfinite();
 }
-
-function selectAdultCat(cat) {
-  currentAdultCat = (currentAdultCat === cat) ? 'trending' : cat;
-  render();
-}
-
-// ═══════════════════════════════════════════════════════════
-//  SEARCH — /api/movies/search, /api/adult/search
-// ═══════════════════════════════════════════════════════════
-async function doSearch() {
-  const q = document.getElementById('searchInput').value.trim();
-  if (!q) return render();
-  const el = document.getElementById('content');
+function setAdultSource(s) { adultSource = s; render(); }
+function selectAdultCat(c) { adultCat = (adultCat === c) ? 'trending' : c; render(); }
+async function searchPerformer() {
+  const name = $('#perfInput').value.trim();
+  if (!name) return;
+  query = name;
+  const el = $('#content');
   el.innerHTML = skeletonHTML(12);
   try {
-    if (currentTab === 'adult') {
-      // /api/adult/search?q=
-      const data = await api(`/api/adult/search?q=${encodeURIComponent(q)}`);
-      el.innerHTML = `<div class="section-title"><div class="dot"></div>Results for "${q}"</div>`;
-      el.insertAdjacentHTML('beforeend', gridHTML(data.results || [], true));
-    } else if (currentTab === 'tv') {
-      // /api/movies/search is the movie one; TV search via /api/tv/trending only,
-      // so fallback to movie search across content
-      const data = await api(`/api/movies/search?q=${encodeURIComponent(q)}`);
-      el.innerHTML = `<div class="section-title"><div class="dot"></div>Results for "${q}"</div>`;
-      el.insertAdjacentHTML('beforeend', gridHTML(data.results || []));
-    } else {
-      // /api/movies/search?q=
-      const data = await api(`/api/movies/search?q=${encodeURIComponent(q)}`);
-      el.innerHTML = `<div class="section-title"><div class="dot"></div>Results for "${q}"</div>`;
-      el.insertAdjacentHTML('beforeend', gridHTML(data.results || []));
-    }
-  } catch (e) {
-    el.innerHTML = errorHTML(e.message);
-  }
+    const items = list(await api(`/api/adult/performer/${encodeURIComponent(name)}?source=${adultSource}&page=1`));
+    allItems = items;
+    el.innerHTML = `<div class="section-title"><div class="dot"></div>Performer: "${name}"</div>
+      <div class="filters"><button class="btn btn-ghost" onclick="render()" style="color:var(--text)">← Back to browse</button></div>
+      <div class="grid" id="mainGrid">${gridHTML(items, { adult: true })}</div>`;
+  } catch (e) { el.innerHTML = errorHTML(e.message, 'searchPerformer()'); }
 }
 
-// ═══════════════════════════════════════════════════════════
-//  DETAIL MODAL
-// ═══════════════════════════════════════════════════════════
+// ── MY LIST ──────────────────────────────────────────────────
+function renderMyList(el) {
+  el.innerHTML = `
+    <div class="section-title"><div class="dot"></div>⭐ My Watchlist<span class="sub">${myMovies.length} saved</span></div>
+    ${gridHTML(myMovies)}
+    ${rowHTML('▶ Continue Watching', myContinue)}`;
+}
+function toggleFav(item) {
+  const i = myMovies.findIndex(m => String(m.id) === String(item.id));
+  if (i >= 0) myMovies.splice(i, 1); else myMovies.unshift(item);
+  LS.set('mbx_list', myMovies);
+  if (tab === 'list') renderMyList($('#content'));
+  else document.querySelectorAll('.card').forEach(() => {});
+  const btns = document.querySelectorAll('.fav-btn');
+  render?.();
+  if (tab === 'home' || tab === 'movies' || tab === 'tv' || tab === 'adult') { /* keep view, toast only */ }
+  showToast(i >= 0 ? 'Removed from My List' : '★ Added to My List');
+}
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--accent);color:#fff;padding:12px 22px;border-radius:22px;font-weight:700;z-index:1000;box-shadow:0 8px 30px rgba(0,0,0,.5)';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 1800);
+}
+
+// ═══ Search ═════════════════════════════════════════════════
+async function doSearch() {
+  const q = $('#searchInput').value.trim();
+  if (!q) return render();
+  query = q;
+  const el = $('#content');
+  el.innerHTML = skeletonHTML(12);
+  try {
+    let items;
+    if (tab === 'adult') items = list(await api(`/api/adult/search?q=${encodeURIComponent(q)}&source=${adultSource}&page=1`));
+    else if (tab === 'tv') items = list(await api(`/api/tv/search?q=${encodeURIComponent(q)}&page=1`));
+    else items = list(await api(`/api/movies/search?q=${encodeURIComponent(q)}&page=1`));
+    allItems = items;
+    el.innerHTML = `<div class="section-title"><div class="dot"></div>Results for "${q}"
+      <span class="sub">${items.length} found</span></div>
+      <div class="filters"><button class="btn btn-ghost" onclick="render()" style="color:var(--text)">← Clear search</button></div>
+      <div class="grid" id="mainGrid">${gridHTML(items, { adult: tab === 'adult', tv: tab === 'tv' })}</div>`;
+  } catch (e) { el.innerHTML = errorHTML(e.message, 'doSearch()'); }
+}
+
+// ═══ Detail modal ═══════════════════════════════════════════
+let currentItem = null;
 async function openDetail(item) {
-  const modal = document.getElementById('modalBackdrop');
-  modal.classList.add('open');
-  document.getElementById('modalTitle').textContent = item.title || 'Untitled';
-  document.getElementById('modalSub').innerHTML = 'Loading…';
-  document.getElementById('playerWrap').innerHTML = '';
-  document.getElementById('sourcesRow').innerHTML = '';
-  document.getElementById('epSelector').innerHTML = '';
-  document.getElementById('epList').innerHTML = '';
-  document.getElementById('modalGenres').innerHTML = '';
-  document.getElementById('modalSynopsis').textContent = '';
+  currentItem = item;
+  $('#modalBackdrop').classList.add('open');
+  $('#modalTitle').textContent = item.title || 'Untitled';
+  $('#modalHero').style.backgroundImage = `url('${item.poster || ''}')`;
+  $('#modalSub').innerHTML = 'Loading…';
+  $('#playerWrap').innerHTML = '';
+  $('#sourcesRow').innerHTML = '';
+  $('#actionRow').innerHTML = '';
+  $('#epSelector').innerHTML = '';
+  $('#epList').innerHTML = '';
+  $('#modalGenres').innerHTML = '';
+  $('#modalSynopsis').textContent = '';
 
   try {
-    if (item.adult && item.source) {
-      // /api/adult/video/:source/:id
-      const data = await api(`/api/adult/video/${encodeURIComponent(item.source)}/${encodeURIComponent(item.id)}`);
-      renderAdultDetail(data, item);
-    } else if (item.adult) {
-      const data = await api(`/api/adult/video/xvideos/${encodeURIComponent(item.id)}`);
-      renderAdultDetail(data, item);
+    if (item.adult) {
+      const d = await api(`/api/adult/video/${encodeURIComponent(item.source || 'xvideos')}/${encodeURIComponent(item.id)}`);
+      renderAdultDetail(d, item);
+    } else if (item.tv) {
+      const d = await api(`/api/tv/${encodeURIComponent(item.id)}`);
+      renderTVDetail(d, item);
     } else {
-      // Try movie first: /api/movie/:id
       try {
-        const data = await api(`/api/movie/${encodeURIComponent(item.id)}`);
-        renderMovieDetail(data, item);
-      } catch (e) {
-        // Fallback to TV: /api/tv/:id
-        const data = await api(`/api/tv/${encodeURIComponent(item.id)}`);
-        renderTVDetail(data, item);
+        const d = await api(`/api/movie/${encodeURIComponent(item.id)}`);
+        renderMovieDetail(d, item);
+      } catch {
+        const d = await api(`/api/tv/${encodeURIComponent(item.id)}`);
+        renderTVDetail(d, item);
       }
     }
   } catch (e) {
-    document.getElementById('modalSub').innerHTML = `<span style="color:var(--accent2)">${e.message}</span>`;
+    $('#modalSub').innerHTML = `<span style="color:var(--accent2)">${e.message}</span>
+      <button class="btn btn-primary" style="padding:5px 12px;font-size:11px" onclick='openDetail(${JSON.stringify(item).replace(/'/g, "&#39;")})'>↻ Retry</button>`;
   }
+}
+
+function actionButtonsHTML(item, trailerId) {
+  return `
+    <button class="btn btn-ghost" style="color:var(--text);border-color:var(--border)" onclick='toggleFav(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
+      ${myMovies.some(m => String(m.id) === String(item.id)) ? '★ In My List' : '☆ Add to My List'}</button>
+    ${trailerId ? `<button class="btn btn-ghost" style="color:var(--text);border-color:var(--border)" onclick="openTrailer('${trailerId}')">▶ Trailer</button>` : ''}`;
 }
 
 function renderMovieDetail(d, item) {
-  document.getElementById('modalTitle').textContent = d.title || item.title || 'Untitled';
-  const sub = [
-    d.year ? `📅 ${d.year}` : '',
-    d.rating ? `★ ${d.rating}` : '',
-    d.runtime ? `⏱ ${d.runtime}` : ''
-  ].filter(Boolean).join(' · ');
-  document.getElementById('modalSub').innerHTML = sub;
-  document.getElementById('modalSynopsis').textContent = d.synopsis || d.overview || 'No synopsis available.';
-  const genres = d.genres || [];
-  document.getElementById('modalGenres').innerHTML = genres.map(g => `<span class="genre-tag">${g}</span>`).join('');
-
-  // Load stream sources: /api/movie/:id/sources
+  $('#modalTitle').textContent = d.title || item.title;
+  $('#modalHero').style.backgroundImage = `url('${d.backdrop || d.poster || item.poster || ''}')`;
+  $('#modalSub').innerHTML = [d.year && `📅 ${d.year}`, d.rating && `★ ${d.rating}`, d.runtime && `⏱ ${d.runtime}`, d.quality && `<span style="background:var(--accent);padding:2px 9px;border-radius:9px;font-size:11px;font-weight:700;color:#fff">${d.quality}</span>`].filter(Boolean).join('');
+  $('#modalSynopsis').textContent = d.synopsis || 'No synopsis available.';
+  $('#modalGenres').innerHTML = (d.genres || []).map(g => `<span class="genre-tag">${g}</span>`).join('');
+  $('#actionRow').innerHTML = actionButtonsHTML(item, item.id);
   api(`/api/movie/${encodeURIComponent(item.id)}/sources`)
-    .then(s => renderSources(s.sources || s.results || [], d.title || item.title))
-    .catch(e => {
-      document.getElementById('sourcesRow').innerHTML =
-        `<div class="status error" style="margin:0;padding:12px">${e.message}</div>`;
-    });
+    .then(s => renderSources(s.sources || s.results || [], d.title))
+    .catch(e => $('#sourcesRow').innerHTML = errorHTML(e.message, 'closeModal()'));
 }
 
-function renderTVDetail(d, item) {
-  document.getElementById('modalTitle').textContent = d.title || item.title || 'Untitled';
-  document.getElementById('modalSub').innerHTML = d.year ? `📅 ${d.year} · TV Series` : 'TV Series';
-  document.getElementById('modalSynopsis').textContent = d.synopsis || d.overview || 'No synopsis available.';
-  const genres = d.genres || [];
-  document.getElementById('modalGenres').innerHTML = genres.map(g => `<span class="genre-tag">${g}</span>`).join('');
+async function renderTVDetail(d, item) {
+  $('#modalTitle').textContent = d.title || item.title;
+  $('#modalHero').style.backgroundImage = `url('${d.backdrop || d.poster || item.poster || ''}')`;
+  $('#modalSub').innerHTML = [d.year && `📅 ${d.year}`, d.rating && `★ ${d.rating}`, 'TV Series'].filter(Boolean).join('');
+  $('#modalSynopsis').textContent = d.synopsis || 'No synopsis available.';
+  $('#modalGenres').innerHTML = (d.genres || []).map(g => `<span class="genre-tag">${g}</span>`).join('');
+  $('#actionRow').innerHTML = actionButtonsHTML(item, null);
 
   const seasons = d.seasons || [];
-  if (seasons.length > 0) {
-    const selHTML = `
-      <select id="seasonSel" onchange="onSeasonChange('${item.id}')">
-        ${seasons.map(s => `<option value="${s}">Season ${s}</option>`).join('')}
-      </select>`;
-    document.getElementById('epSelector').innerHTML = selHTML;
-    onSeasonChange(item.id);
-  }
+  if (!seasons.length) return;
+  $('#epSelector').innerHTML = `
+    <select id="seasonSel" onchange="loadSeason('${item.id}')">
+      ${seasons.map(s => `<option value="${s.number}">Season ${s.number} (${s.episodes} eps)</option>`).join('')}
+    </select>
+    <span style="color:var(--muted);font-size:12px">Pick an episode below</span>`;
+  await loadSeason(item.id);
 }
 
-async function onSeasonChange(id) {
-  const season = document.getElementById('seasonSel')?.value || 1;
-  const list = document.getElementById('epList');
-  list.innerHTML = `<div class="status" style="grid-column:1/-1">Loading episodes…</div>`;
+async function loadSeason(id) {
+  const season = $('#seasonSel').value;
+  const list = $('#epList');
+  list.innerHTML = `<div class="status" style="grid-column:1/-1;padding:22px">Loading episodes…</div>`;
   try {
-    // /api/tv/:id/:season/:episode — pull episode 1 first to reveal list
-    const data = await api(`/api/tv/${encodeURIComponent(id)}/${encodeURIComponent(season)}/1`);
-    const eps = data.episodes || [];
-    if (eps.length === 0) {
-      list.innerHTML = `<div class="status" style="grid-column:1/-1">No episodes found.</div>`;
-    } else {
-      list.innerHTML = eps.map(n => `
-        <button class="ep-btn" onclick="playEpisode('${id}','${season}','${n}')">E${n}</button>
-      `).join('');
-      playEpisode(id, season, eps[0]);
-    }
-  } catch (e) {
-    list.innerHTML = `<div class="status error" style="grid-column:1/-1">${e.message}</div>`;
-  }
+    const s = await api(`/api/tv/${encodeURIComponent(id)}/season/${encodeURIComponent(season)}`);
+    const eps = s.episodes || [];
+    if (!eps.length) { list.innerHTML = `<div class="status" style="grid-column:1/-1">No episodes found.</div>`; return; }
+    list.innerHTML = eps.map(e => `
+      <div class="ep-card" onclick="playEpisode('${id}','${season}','${e.number}', this)">
+        ${e.thumb ? `<img src="${e.thumb}" alt="E${e.number}" onerror="this.style.display='none'">` : `<div style="width:86px;aspect-ratio:16/9;background:var(--bg2);border-radius:5px"></div>`}
+        <div>
+          <div class="ep-t">E${e.number} · ${e.title || 'Untitled'}</div>
+          <div class="ep-d">${e.air_date || ''}</div>
+        </div>
+      </div>`).join('');
+    playEpisode(id, season, eps[0].number, list.querySelector('.ep-card'));
+  } catch (e) { list.innerHTML = errorHTML(e.message, `loadSeason('${id}')`); }
 }
 
-async function playEpisode(id, season, episode) {
-  document.getElementById('epList').querySelectorAll('.ep-btn').forEach(b => {
-    b.classList.toggle('active', b.textContent.trim() === `E${episode}`);
-  });
+async function playEpisode(id, season, episode, cardEl) {
+  cancelNext();
+  document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
+  cardEl && cardEl.classList.add('active');
+  currentEp = { id, season, episode };
+  $('#playerWrap').innerHTML = '<div class="status">Loading stream…</div>';
   try {
-    const data = await api(`/api/tv/${encodeURIComponent(id)}/${encodeURIComponent(season)}/${encodeURIComponent(episode)}`);
-    renderSources(data.sources || (data.url ? [{name:'Primary', url: data.url}] : []), `S${season}E${episode}`);
+    const d = await api(`/api/tv/${encodeURIComponent(id)}/${encodeURIComponent(season)}/${encodeURIComponent(episode)}`);
+    nextInfo = d.next || null;
+    renderSources(d.sources || [], `${d.title || `S${season}E${episode}`}`, true);
   } catch (e) {
-    document.getElementById('sourcesRow').innerHTML =
-      `<div class="status error" style="margin:0;padding:12px">${e.message}</div>`;
+    $('#playerWrap').innerHTML = errorHTML(e.message, `playEpisode('${id}','${season}','${episode}')`);
   }
 }
 
 function renderAdultDetail(d, item) {
-  document.getElementById('modalTitle').textContent = d.title || item.title || 'Adult Video';
-  const sub = [
-    d.duration ? `⏱ ${d.duration}` : '',
-    d.views ? `👁 ${d.views}` : '',
-    d.source ? `source: ${d.source}` : ''
-  ].filter(Boolean).join(' · ');
-  document.getElementById('modalSub').innerHTML = sub;
-  document.getElementById('modalSynopsis').textContent = d.description || '';
-  renderSources(d.sources || (d.url ? [{name: 'Primary', url: d.url}] : []), d.title);
+  $('#modalTitle').textContent = d.title || item.title || 'Adult Video';
+  $('#modalHero').style.backgroundImage = `url('${d.thumb || item.poster || ''}')`;
+  $('#modalSub').innerHTML = [d.duration && `⏱ ${d.duration}`, d.views && `👁 ${d.views}`, d.source && `source: ${d.source}`].filter(Boolean).join('');
+  $('#actionRow').innerHTML = actionButtonsHTML(item, null);
+  renderSources(d.sources || (d.url ? [{ name: 'Primary', url: d.url }] : []), d.title);
 }
 
-function renderSources(sources, title) {
-  const row = document.getElementById('sourcesRow');
-  const wrap = document.getElementById('playerWrap');
-  if (!Array.isArray(sources) || sources.length === 0) {
+function renderSources(sources, title, isTV = false) {
+  const row = $('#sourcesRow');
+  if (!Array.isArray(sources) || !sources.length) {
     row.innerHTML = `<div class="status" style="padding:8px">No stream sources available.</div>`;
     return;
   }
   row.innerHTML = sources.map((s, i) => `
-    <button class="src-btn ${i === 0 ? 'active' : ''}"
-            onclick="playSource('${encodeURIComponent(s.url)}', this)">${s.name || `Source ${i+1}`}</button>
-  `).join('');
-  playSource(encodeURIComponent(sources[0].url), null);
+    <button class="src-btn ${i === 0 ? 'active' : ''}" onclick="playSource('${encodeURIComponent(s.url)}', this)">
+      ${s.name || `Source ${i + 1}`} ${s.quality ? `· ${s.quality}` : ''}</button>`).join('');
+  playSource(encodeURIComponent(sources[0].url), null, isTV);
 }
 
-function playSource(encodedUrl, btn) {
-  if (btn) {
-    document.querySelectorAll('.src-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  }
-  const url = decodeURIComponent(encodedUrl);
-  const wrap = document.getElementById('playerWrap');
+function playSource(encUrl, btn, isTV = false) {
+  if (btn) { document.querySelectorAll('.src-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+  cancelNext();
+  const url = decodeURIComponent(encUrl);
+  const wrap = $('#playerWrap');
+  const nextHTML = $('#nextOverlay').outerHTML;
   if (/\.(mp4|m3u8|webm)(\?|$)/i.test(url)) {
-    wrap.innerHTML = `<video src="${url}" controls autoplay playsinline></video>`;
+    wrap.innerHTML = `<video src="${url}" controls autoplay playsinline></video>
+      <button class="pip-btn" onclick="goPiP()">⧉ Picture-in-Picture</button>${nextHTML}`;
+    const v = wrap.querySelector('video');
+    v.addEventListener('timeupdate', () => {
+      if (!currentItem) return;
+      const pct = v.duration ? (v.currentTime / v.duration) * 100 : 0;
+      saveProgress(pct);
+    });
+    v.addEventListener('ended', () => { if (isTV && nextInfo) startNextCountdown(); });
   } else {
-    wrap.innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>`;
+    wrap.innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>${nextHTML}`;
+    if (isTV && nextInfo) setTimeout(startNextCountdown, 1000);
   }
 }
+
+function saveProgress(pct) {
+  const entry = { ...currentItem, progress: Math.round(pct) };
+  const i = myContinue.findIndex(c => String(c.id) === String(currentItem.id));
+  if (i >= 0) myContinue[i] = entry; else myContinue.unshift(entry);
+  myContinue = myContinue.slice(0, 24);
+  LS.set('mbx_continue', myContinue);
+}
+
+function goPiP() {
+  const v = $('#playerWrap video');
+  if (!v) return showToast('PiP works on direct video streams only');
+  (document.pictureInPictureElement ? document.exitPictureInPicture() : v.requestPictureInPicture()).catch(() => showToast('PiP blocked by browser'));
+}
+
+// auto-next countdown
+function startNextCountdown() {
+  const ov = $('#nextOverlay');
+  if (!ov || !nextInfo) return;
+  ov.classList.add('show');
+  $('#nextLabel').textContent = `Next: Season ${nextInfo.season} Episode ${nextInfo.episode}`;
+  let n = 5;
+  $('#nextCount').textContent = `Playing in ${n}s`;
+  clearInterval(nextTimer);
+  nextTimer = setInterval(() => {
+    n--;
+    $('#nextCount').textContent = `Playing in ${n}s`;
+    if (n <= 0) playNextNow();
+  }, 1000);
+}
+function cancelNext() { clearInterval(nextTimer); $('#nextOverlay')?.classList.remove('show'); }
+function playNextNow() {
+  if (!nextInfo || !currentEp) return cancelNext();
+  cancelNext();
+  playEpisode(currentEp.id, nextInfo.season, nextInfo.episode, null);
+}
+
+// trailer
+async function openTrailer(id) {
+  $('#trailerModal').classList.add('open');
+  $('#trailerWrap').innerHTML = '<div class="status">Loading trailer…</div>';
+  try {
+    const t = await api(`/api/movie/${encodeURIComponent(id)}/trailer`);
+    $('#trailerWrap').innerHTML = `<iframe src="${t.url}" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
+  } catch (e) {
+    $('#trailerWrap').innerHTML = errorHTML(e.message, 'closeTrailer()');
+  }
+}
+function closeTrailer() { $('#trailerModal').classList.remove('open'); $('#trailerWrap').innerHTML = ''; }
 
 function closeModal() {
-  document.getElementById('modalBackdrop').classList.remove('open');
-  document.getElementById('playerWrap').innerHTML = '';
+  $('#modalBackdrop').classList.remove('open');
+  cancelNext();
+  $('#playerWrap').innerHTML = '';
+  currentItem = null;
 }
 
-// ═══════════════════════════════════════════════════════════
-//  Age gate
-// ═══════════════════════════════════════════════════════════
+// age gate
 function enterAdult() {
   adultUnlocked = true;
-  localStorage.setItem('mbx_age_ok', '1');
-  document.getElementById('ageGate').classList.remove('open');
-  currentTab = 'adult';
-  document.querySelectorAll('.nav-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.tab === 'adult');
-  });
-  render();
+  LS.set('mbx_age_ok', 1);
+  $('#ageGate').classList.remove('open');
+  switchTab('adult');
 }
+function leaveAdult() { $('#ageGate').classList.remove('open'); goHome(); }
 
-function leaveAdult() {
-  document.getElementById('ageGate').classList.remove('open');
-  goHome();
-}
-
-// ═══════════════════════════════════════════════════════════
-//  Boot
-// ═══════════════════════════════════════════════════════════
+// keys
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Escape') { closeModal(); closeTrailer(); }
 });
+
 render();
 </script>
 </body>
