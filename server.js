@@ -2,6 +2,24 @@ const express = require('express');
 const path = require('path');
 const Database = require('better-sqlite3');
 const cors = require('cors');
+const fs = require('fs');  // ← ADD THIS LINE
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// ─── Ensure data directory exists ────────────────────────────────
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+app.use(cors());
+// ... rest of your server.js stays the same
+
+const express = require('express');
+const path = require('path');
+const Database = require('better-sqlite3');
+const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
