@@ -10,7 +10,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow-x:hidden}
 button{cursor:pointer;font-family:inherit}
-input,select{font-family:inherit}
 header{position:sticky;top:0;z-index:100;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .logo{font-size:20px;font-weight:800;cursor:pointer;white-space:nowrap}
 .logo .film{color:var(--accent)}
@@ -31,10 +30,10 @@ main{padding:20px;max-width:1440px;margin:0 auto}
 .section-title{font-size:18px;font-weight:700;margin:24px 0 13px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .section-title .dot{width:5px;height:20px;background:var(--accent);border-radius:3px}
 .section-title .sub{font-size:11.5px;color:var(--muted);font-weight:500;margin-left:auto}
-.hero{position:relative;border-radius:14px;overflow:hidden;height:380px;background:var(--bg3);margin-bottom:8px}
+.hero{position:relative;border-radius:14px;overflow:hidden;height:380px;background:var(--bg3)}
 .hero-slide{position:absolute;inset:0;opacity:0;transition:opacity .7s;background-size:cover;background-position:center}
 .hero-slide.active{opacity:1}
-.hero-slide::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,13,18,.95) 0%,rgba(11,13,18,.55) 55%,rgba(11,13,18,.1) 100%)}
+.hero-slide::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,13,18,.95),rgba(11,13,18,.55) 55%,rgba(11,13,18,.1))}
 .hero-info{position:absolute;left:0;bottom:0;z-index:2;padding:30px;max-width:600px}
 .hero-info h1{font-size:33px;line-height:1.15;margin-bottom:10px}
 .hero-info p{color:#cfd4de;font-size:13.5px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
@@ -53,7 +52,7 @@ main{padding:20px;max-width:1440px;margin:0 auto}
 .row::-webkit-scrollbar{height:6px}
 .row::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 .row .card{flex:0 0 165px}
-.rank{position:absolute;left:-5px;top:-5px;z-index:2;font-size:60px;font-weight:900;color:var(--text);-webkit-text-stroke:3px var(--accent);text-shadow:0 4px 16px rgba(0,0,0,.6);line-height:1}
+.rank{position:absolute;left:-5px;top:-5px;z-index:2;font-size:60px;font-weight:900;color:var(--text);-webkit-text-stroke:3px var(--accent);line-height:1}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px}
 .card{background:var(--bg2);border-radius:10px;overflow:hidden;cursor:pointer;transition:.18s;border:1px solid var(--border);position:relative}
 .card:hover{transform:translateY(-4px);border-color:var(--accent)}
@@ -102,28 +101,32 @@ main{padding:20px;max-width:1440px;margin:0 auto}
 .player-wrap video,.player-wrap iframe{width:100%;height:100%;border:0;display:block}
 .player-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:linear-gradient(135deg,#0d1017,#161a24);color:var(--muted);text-align:center;padding:20px}
 .player-placeholder .big-play{width:76px;height:76px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:32px;cursor:pointer;box-shadow:0 8px 30px rgba(229,9,20,.4)}
-.player-placeholder .big-play:hover{transform:scale(1.05)}
 .player-placeholder .msg{font-size:13.5px;max-width:420px;line-height:1.55}
 .player-placeholder .msg strong{color:var(--text)}
 .player-placeholder .err{color:var(--accent2);background:rgba(229,9,20,.1);border:1px solid rgba(229,9,20,.3);padding:9px 13px;border-radius:8px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;max-width:560px;word-break:break-word}
 .spin{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 .src-status{position:absolute;left:11px;top:11px;z-index:7;background:rgba(0,0,0,.72);color:#fff;padding:6px 11px;border-radius:8px;font-size:11.5px;font-weight:600}
+.src-status.ok{background:rgba(34,197,94,.85)}
 .pip-btn{position:absolute;right:11px;bottom:11px;z-index:4;background:rgba(0,0,0,.7);border:0;color:#fff;padding:7px 12px;border-radius:8px;font-size:11.5px;font-weight:700}
-.next-overlay{position:absolute;inset:0;background:rgba(11,13,18,.93);display:none;flex-direction:column;align-items:center;justify-content:center;gap:13px;z-index:6;text-align:center;padding:18px}
-.next-overlay.show{display:flex}
-.action-row{display:flex;gap:8px;flex-wrap:wrap;margin:11px 0}
-.sources{display:flex;gap:7px;overflow-x:auto;padding:11px 0;flex-wrap:wrap}
+.src-tools{margin-top:9px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.src-toggle{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:15px;font-size:11px;font-weight:600}
+.src-toggle:hover{color:var(--text);border-color:var(--accent)}
+.src-panel{display:none;gap:7px;flex-wrap:wrap;padding:10px 0}
+.src-panel.open{display:flex}
 .src-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 13px;border-radius:8px;font-size:11.5px;font-weight:600}
 .src-btn:hover,.src-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .src-btn.auto{background:var(--gold);color:#111;border-color:var(--gold)}
 .src-btn.auto.off{background:var(--bg3);color:var(--text);border-color:var(--border)}
+.next-overlay{position:absolute;inset:0;background:rgba(11,13,18,.93);display:none;flex-direction:column;align-items:center;justify-content:center;gap:13px;z-index:6;text-align:center;padding:18px}
+.next-overlay.show{display:flex}
+.action-row{display:flex;gap:8px;flex-wrap:wrap;margin:11px 0}
 .genres{display:flex;gap:5px;flex-wrap:wrap;margin:9px 0}
 .genre-tag{background:var(--bg3);color:var(--text);padding:4px 11px;border-radius:13px;font-size:11.5px;border:1px solid var(--border)}
 .synopsis{color:var(--muted);font-size:13.5px;line-height:1.65;margin:10px 0}
+.sk-poster{width:100%;aspect-ratio:2/3;border-radius:10px}
 .skeleton{background:linear-gradient(90deg,var(--bg2),var(--bg3),var(--bg2));background-size:200% 100%;animation:shimmer 1.2s infinite}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.sk-poster{width:100%;aspect-ratio:2/3;border-radius:10px}
 .sk-line{height:11px;border-radius:4px;margin-top:9px}
 .status{text-align:center;padding:50px 18px;color:var(--muted);font-size:14px}
 .status.error{color:var(--accent2);background:rgba(229,9,20,.08);border:1px solid rgba(229,9,20,.25);border-radius:11px;margin:15px 0;word-break:break-word;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;text-align:left;padding:14px}
@@ -133,7 +136,6 @@ main{padding:20px;max-width:1440px;margin:0 auto}
 .age-gate .warn{font-size:64px;margin-bottom:14px}
 .age-gate h2{font-size:27px;margin-bottom:9px}
 .age-gate p{color:var(--muted);font-size:14px;max-width:500px;line-height:1.6;margin-bottom:24px}
-.age-gate .actions{display:flex;gap:13px;flex-wrap:wrap;justify-content:center}
 footer{padding:32px 22px;margin-top:42px;border-top:1px solid var(--border);color:var(--muted);text-align:center;font-size:12.5px}
 @media(max-width:720px){
   header{padding:10px 12px;gap:9px}
@@ -162,30 +164,27 @@ footer{padding:32px 22px;margin-top:42px;border-top:1px solid var(--border);colo
     <button class="nav-btn" data-tab="list" onclick="switchTab('list')">⭐ My List</button>
   </nav>
   <div class="search-box"><span>🔍</span><input id="searchInput" type="text" placeholder="Search..." onkeydown="if(event.key==='Enter') doSearch()"></div>
-  <div class="rd-badge off" id="rdBadge">⚡ 4K</div>
+  <div class="rd-badge off" id="rdBadge">📋 4K via Magnet</div>
   <button class="icon-btn" onclick="clearCache()" title="Clear cache">🧹</button>
   <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Theme">🌙</button>
 </header>
 
 <main><div id="content"></div><div id="sentinel" style="height:55px"></div></main>
-
 <footer>🎬 MovieBox · streaming aggregator</footer>
 
-<!-- ═══ DETAIL MODAL ═══ -->
 <div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this) closeModal()">
   <div class="modal">
     <div class="modal-hero" id="modalHero"></div>
     <button class="close-btn" onclick="closeModal()">✕</button>
     <div class="modal-head"><div><h2 id="modalTitle">—</h2><div class="modal-sub" id="modalSub"></div></div></div>
     <div class="modal-body">
-      <div class="player-wrap" id="playerWrap">
-        <div class="player-placeholder" id="playerPlaceholder">
-          <div class="spin"></div>
-          <div class="msg">Loading player…</div>
-        </div>
+      <div class="player-wrap" id="playerWrap"></div>
+      <div class="src-tools">
+        <button class="src-toggle" onclick="toggleSrcPanel()">⚙ Switch source</button>
+        <button class="src-toggle" onclick="retryCurrent()">↻ Reload</button>
       </div>
+      <div class="src-panel" id="srcPanel"></div>
       <div class="action-row" id="actionRow"></div>
-      <div class="sources" id="sourcesRow"></div>
       <div id="epSelector"></div>
       <div class="ep-grid" id="epList"></div>
       <div class="genres" id="modalGenres"></div>
@@ -194,12 +193,11 @@ footer{padding:32px 22px;margin-top:42px;border-top:1px solid var(--border);colo
   </div>
 </div>
 
-<!-- ═══ AGE GATE ═══ -->
 <div class="age-gate" id="ageGate">
   <div class="warn">🔞</div>
   <h2>Are you 18 or older?</h2>
-  <p>This section contains adult content. By entering you confirm you are of legal age to view explicit material in your jurisdiction.</p>
-  <div class="actions">
+  <p>This section contains adult content. By entering you confirm you are of legal age in your jurisdiction.</p>
+  <div style="display:flex;gap:13px;flex-wrap:wrap;justify-content:center">
     <button class="btn btn-gold" onclick="enterAdult()">Yes, I'm 18+</button>
     <button class="btn" style="background:var(--bg3);color:var(--text)" onclick="leaveAdult()">No, take me back</button>
   </div>
@@ -217,12 +215,9 @@ let tab = 'home', genre = null, adultCat = 'trending', adultSource = 'all', quer
 let pageNo = 1, allItems = [], loading = false, exhausted = false;
 let myMovies = LS.get('mbx_list', []), myContinue = LS.get('mbx_continue', []);
 let adultUnlocked = LS.get('mbx_age_ok', 0) === 1;
-let currentItem = null, currentSources = [], srcIdx = 0, srcTimer = null, currentIsTV = false, currentEp = null;
-let autoFallback = LS.get('mbx_autofb', true);
-let srcHealth = LS.get('mbx_src_health', {});
+let currentItem = null, currentSources = [], srcIdx = 0, srcTimer = null, currentEp = null;
 let nextInfo = null, nextTimer = null;
 
-// ── THEME ───────────────────────────────────────────
 document.documentElement.dataset.theme = LS.get('mbx_theme', 'dark');
 updateThemeBtn();
 function toggleTheme() {
@@ -230,12 +225,8 @@ function toggleTheme() {
   document.documentElement.dataset.theme = t; LS.set('mbx_theme', t); updateThemeBtn();
 }
 function updateThemeBtn() { $('#themeBtn').textContent = document.documentElement.dataset.theme === 'dark' ? '🌙' : '☀️'; }
+async function clearCache() { try { await api('/api/cache/clear', { method: 'POST' }); showToast('Cache cleared'); } catch { showToast('Clear failed'); } }
 
-async function clearCache() {
-  try { await api('/api/cache/clear', { method: 'POST' }); showToast('Cache cleared'); } catch { showToast('Cache clear failed'); }
-}
-
-// ── FETCH (defensive) ───────────────────────────────
 async function api(url, opts = {}) {
   let r;
   try { r = await fetch(url, opts); }
@@ -243,7 +234,7 @@ async function api(url, opts = {}) {
   const ct = r.headers.get('content-type') || '';
   if (!ct.includes('application/json')) {
     const txt = await r.text().catch(() => '');
-    throw new Error(`${url} returned non-JSON (status ${r.status}). First bytes: ${txt.slice(0, 80)}`);
+    throw new Error(`${url} returned non-JSON (${r.status}). ${txt.slice(0, 80)}`);
   }
   const d = await r.json();
   if (!r.ok) throw new Error(d.error || `HTTP ${r.status} on ${url}`);
@@ -251,19 +242,17 @@ async function api(url, opts = {}) {
 }
 const list = d => Array.isArray(d?.results) ? d.results : [];
 
-// ── CARD (data-attribute safe, no inline JSON) ──────
 function cardHTML(it, opts = {}) {
   const poster = it.poster || it.thumbnail || it.image || 'https://placehold.co/300x450/12151d/8d94a3?text=No+Poster';
   const title = String(it.title || it.name || 'Untitled');
   const inList = myMovies.some(m => String(m.id) === String(it.id));
   const cont = myContinue.find(c => String(c.id) === String(it.id) && c.progress > 1 && c.progress < 98);
   const type = opts.adult ? 'adult' : (opts.tv ? 'tv' : 'movie');
-  const source = it.source || '';
   return `
   <div class="card ${opts.adult ? 'adult' : ''}"
-       data-id="${String(it.id).replace(/"/g, '&quot;')}"
+       data-id="${String(it.id).replace(/"/g,'&quot;')}"
        data-type="${type}"
-       data-source="${String(source).replace(/"/g, '&quot;')}"
+       data-source="${String(it.source || '').replace(/"/g,'&quot;')}"
        onclick="openFromCard(this)">
     <div class="poster-wrap">
       ${opts.rank ? `<div class="rank">${opts.rank}</div>` : ''}
@@ -278,35 +267,33 @@ function cardHTML(it, opts = {}) {
       </div>
     </div>
     <div class="info">
-      <div class="title" title="${title.replace(/"/g, '&quot;')}">${title}</div>
-      <div class="meta"><span>${it.year || source || ''}</span></div>
+      <div class="title" title="${title.replace(/"/g,'&quot;')}">${title}</div>
+      <div class="meta"><span>${it.year || it.source || ''}</span></div>
       ${cont ? `<div class="progress"><i style="width:${Math.min(100, cont.progress)}%"></i></div>` : ''}
     </div>
   </div>`;
 }
-
 function rowHTML(title, items, opts = {}) {
   if (!items || !items.length) return '';
   return `<div class="section-title"><div class="dot"></div>${title}${opts.sub ? `<span class="sub">${opts.sub}</span>` : ''}</div>
-    <div class="row">${items.map((it, i) => cardHTML(it, { ...opts, rank: opts.ranked ? i + 1 : 0 })).join('')}</div>`;
+    <div class="row">${items.map((it,i) => cardHTML(it,{...opts, rank: opts.ranked ? i+1 : 0})).join('')}</div>`;
 }
 function gridHTML(items, opts = {}) {
   if (!items || !items.length) return `<div class="status"><div style="font-size:38px;margin-bottom:9px">🤷</div>No results found.</div>`;
   return `<div class="grid">${items.map(it => cardHTML(it, opts)).join('')}</div>`;
 }
-const skeletonHTML = (n = 12) => `<div class="grid">${Array.from({ length: n }, () =>
+const skeletonHTML = (n = 12) => `<div class="grid">${Array.from({length:n},() =>
   `<div><div class="sk-poster skeleton"></div><div class="sk-line skeleton"></div><div class="sk-line skeleton" style="width:60%"></div></div>`).join('')}</div>`;
 const errorHTML = (msg, retryFn = 'render()') => `
   <div class="status error"><strong>⚠️ Failed to load</strong><br><br>${msg}
   <div class="retry"><button class="btn btn-primary" onclick="${retryFn}">↻ Retry</button></div></div>`;
 
-// ── HERO ────────────────────────────────────────────
 function heroHTML(items) {
   const top = (items || []).filter(i => i.backdrop).slice(0, 5);
   if (!top.length) return '';
   return `<div class="hero" id="hero">
-    ${top.map((it, i) => `
-      <div class="hero-slide ${i === 0 ? 'active' : ''}" style="background-image:url('${it.backdrop}')">
+    ${top.map((it,i) => `
+      <div class="hero-slide ${i===0?'active':''}" style="background-image:url('${it.backdrop}')">
         <div class="hero-info">
           <div class="hero-meta">
             ${it.rating ? `<span style="color:var(--gold);font-weight:700">★ ${it.rating}</span>` : ''}
@@ -321,7 +308,7 @@ function heroHTML(items) {
           </div>
         </div>
       </div>`).join('')}
-    <div class="hero-dots">${top.map((_, i) => `<span class="${i === 0 ? 'on' : ''}" onclick="heroGo(${i})"></span>`).join('')}</div>
+    <div class="hero-dots">${top.map((_,i)=>`<span class="${i===0?'on':''}" onclick="heroGo(${i})"></span>`).join('')}</div>
   </div>`;
 }
 let heroIdx = 0, heroTimer = null, heroCount = 0;
@@ -333,11 +320,10 @@ function heroStart() {
 }
 function heroGo(i) {
   heroIdx = i;
-  $$('.hero-slide').forEach((s, k) => s.classList.toggle('active', k === i));
-  $$('.hero-dots span').forEach((d, k) => d.classList.toggle('on', k === i));
+  $$('.hero-slide').forEach((s,k)=>s.classList.toggle('active',k===i));
+  $$('.hero-dots span').forEach((d,k)=>d.classList.toggle('on',k===i));
 }
 
-// ── TABS & RENDER ───────────────────────────────────
 function switchTab(t) {
   if (t === 'adult' && !adultUnlocked) { $('#ageGate').classList.add('open'); return; }
   tab = t; genre = null; adultCat = 'trending'; query = '';
@@ -358,16 +344,14 @@ async function render() {
     else if (tab === 'tv') await renderListTab(el, 'tv');
     else if (tab === 'adult') await renderAdult(el);
     else if (tab === 'list') renderMyList(el);
-  } catch (e) {
-    el.innerHTML = errorHTML(e.message);
-  }
+  } catch (e) { el.innerHTML = errorHTML(e.message); }
 }
 
 async function renderHome(el) {
   const [trend, more, tv] = await Promise.all([
     api('/api/movies/trending?page=1'),
-    api('/api/movies/trending?page=2').catch(() => ({ results: [] })),
-    api('/api/tv/trending?page=1').catch(() => ({ results: [] }))
+    api('/api/movies/trending?page=2').catch(() => ({results:[]})),
+    api('/api/tv/trending?page=1').catch(() => ({results:[]}))
   ]);
   const items = list(trend), moreItems = list(more);
   allItems = [...items, ...moreItems];
@@ -381,14 +365,10 @@ async function renderHome(el) {
 }
 
 const MOVIE_GENRES = [['all','All'],['action','Action'],['comedy','Comedy'],['horror','Horror'],['romance','Romance'],['sci-fi','Sci-Fi'],['thriller','Thriller'],['drama','Drama'],['animation','Animation'],['fantasy','Fantasy'],['adventure','Adventure'],['crime','Crime']];
-
 async function renderListTab(el, kind) {
-  if (kind === 'movie') {
-    el.innerHTML = `<div class="pills">${MOVIE_GENRES.map(([k, l]) =>
-      `<button class="pill ${genre === k ? 'active' : ''}" onclick="selectGenre('${k}')">${l}</button>`).join('')}</div><div class="grid" id="mainGrid"></div>`;
-  } else {
-    el.innerHTML = `<div class="grid" id="mainGrid"></div>`;
-  }
+  el.innerHTML = (kind === 'movie'
+    ? `<div class="pills">${MOVIE_GENRES.map(([k,l])=>`<button class="pill ${genre===k?'active':''}" onclick="selectGenre('${k}')">${l}</button>`).join('')}</div>`
+    : '') + `<div class="grid" id="mainGrid"></div>`;
   await loadPage();
   setupInfinite();
 }
@@ -421,8 +401,7 @@ async function loadPage() {
     allItems = [...allItems, ...items];
     if (grid) {
       $('#lm')?.remove();
-      const opts = { adult: tab === 'adult', tv: tab === 'tv' };
-      grid.insertAdjacentHTML('beforeend', items.map(it => cardHTML(it, opts)).join(''));
+      grid.insertAdjacentHTML('beforeend', items.map(it => cardHTML(it, { adult: tab==='adult', tv: tab==='tv' })).join(''));
     }
     pageNo++;
   } catch (e) {
@@ -446,8 +425,8 @@ const ADULT_SOURCES = [['all','All Sources'],['xvideos','XVideos'],['xnxx','XNXX
 
 async function renderAdult(el) {
   el.innerHTML = `
-    <div class="pills">${ADULT_SOURCES.map(([k, l]) => `<button class="pill adult ${adultSource === k ? 'active' : ''}" onclick="setAdultSource('${k}')">${l}</button>`).join('')}</div>
-    <div class="pills">${ADULT_CATS.map(([k, l]) => `<button class="pill adult ${adultCat === k ? 'active' : ''}" onclick="selectAdultCat('${k}')">${l}</button>`).join('')}</div>
+    <div class="pills">${ADULT_SOURCES.map(([k,l])=>`<button class="pill adult ${adultSource===k?'active':''}" onclick="setAdultSource('${k}')">${l}</button>`).join('')}</div>
+    <div class="pills">${ADULT_CATS.map(([k,l])=>`<button class="pill adult ${adultCat===k?'active':''}" onclick="selectAdultCat('${k}')">${l}</button>`).join('')}</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
       <input id="perfInput" placeholder="Search performer / pornstar..." style="background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:8px 12px;border-radius:8px;min-width:220px" onkeydown="if(event.key==='Enter') searchPerformer()">
       <button class="btn btn-primary" onclick="searchPerformer()">Find performer</button>
@@ -478,13 +457,13 @@ function renderMyList(el) {
     ${gridHTML(myMovies)}${rowHTML('▶ Continue Watching', myContinue)}`;
 }
 
-// ── FAVORITES ───────────────────────────────────────
 function toggleFavFromCard(btn) {
   const card = btn.closest('.card');
   const item = { id: card.dataset.id, title: card.querySelector('.title')?.textContent || '', poster: card.querySelector('.poster')?.src || '' };
   toggleFav(item);
-  btn.textContent = myMovies.some(m => String(m.id) === String(item.id)) ? '★' : '☆';
-  btn.classList.toggle('on', myMovies.some(m => String(m.id) === String(item.id)));
+  const on = myMovies.some(m => String(m.id) === String(item.id));
+  btn.textContent = on ? '★' : '☆';
+  btn.classList.toggle('on', on);
 }
 function toggleFav(item) {
   const i = myMovies.findIndex(m => String(m.id) === String(item.id));
@@ -514,28 +493,25 @@ async function doSearch() {
     allItems = items;
     el.innerHTML = `<div class="section-title"><div class="dot"></div>Results for "${q}"<span class="sub">${items.length} found</span></div>
       <div><button class="btn btn-ghost" onclick="render()" style="color:var(--text);margin-bottom:12px">← Clear search</button></div>
-      <div class="grid" id="mainGrid">${items.map(it => cardHTML(it, { adult: tab === 'adult', tv: tab === 'tv' })).join('')}</div>`;
+      <div class="grid" id="mainGrid">${items.map(it => cardHTML(it, { adult: tab==='adult', tv: tab==='tv' })).join('')}</div>`;
   } catch (e) { el.innerHTML = errorHTML(e.message, 'doSearch()'); }
 }
 
-// ═══════════════════════════════════════════════════
-// DETAIL MODAL — always shows SOMETHING, never black
-// ═══════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
+   AUTO-PLAY ENGINE — no source picker, silent hunt
+   ══════════════════════════════════════════════════════ */
 function openFromCard(el) {
   const id = el.dataset.id;
-  const type = el.dataset.type || 'movie';
-  const source = el.dataset.source || '';
-  if (!id) { showToast('Missing movie ID — try refreshing'); return; }
-  openDetail(id, type, source);
+  if (!id) { showToast('Missing ID — refresh'); return; }
+  openDetail(id, el.dataset.type || 'movie', el.dataset.source || '');
 }
 function openById(id, type) { openDetail(id, type, ''); }
 
 function placeholderHTML(kind, msg, extra = '') {
   return `<div class="player-placeholder">
-    <div class="big-play" onclick="retryCurrent()">▶</div>
+    <div class="spin"></div>
     <div class="msg"><strong>${kind}</strong><br>${msg}</div>
     ${extra}
-    <button class="btn btn-primary" onclick="retryCurrent()">↻ Retry</button>
   </div>`;
 }
 
@@ -543,7 +519,6 @@ async function openDetail(id, type, source) {
   currentItem = { id, type, source };
   clearTimeout(srcTimer); clearInterval(nextTimer);
   currentSources = []; currentEp = null; nextInfo = null;
-
   $('#modalBackdrop').classList.add('open');
   $('#modalTitle').textContent = type === 'adult' ? 'Adult Video' : (type === 'tv' ? 'TV Show' : 'Movie');
   $('#modalSub').innerHTML = 'Loading…';
@@ -551,10 +526,11 @@ async function openDetail(id, type, source) {
   $('#modalSynopsis').textContent = '';
   $('#modalGenres').innerHTML = '';
   $('#actionRow').innerHTML = '';
-  $('#sourcesRow').innerHTML = '';
+  $('#srcPanel').innerHTML = '';
+  $('#srcPanel').classList.remove('open');
   $('#epSelector').innerHTML = '';
   $('#epList').innerHTML = '';
-  $('#playerWrap').innerHTML = placeholderHTML('Loading', 'Fetching stream sources…');
+  $('#playerWrap').innerHTML = placeholderHTML('Finding the best stream…', 'Hunting through sources for a working player.');
 
   try {
     if (type === 'adult') {
@@ -571,53 +547,51 @@ async function openDetail(id, type, source) {
     }
   } catch (e) {
     $('#modalSub').innerHTML = `<span style="color:var(--accent2)">⚠️ ${e.message}</span>`;
-    $('#playerWrap').innerHTML = placeholderHTML('Failed to load',
-      'The details request failed. Check your connection and try again.',
-      `<div class="err">${e.message}</div>`);
+    $('#playerWrap').innerHTML = `<div class="player-placeholder">
+      <div class="big-play" onclick="retryCurrent()">▶</div>
+      <div class="msg"><strong>Couldn't load this title</strong><br>Something went wrong while fetching details.</div>
+      <div class="err">${e.message}</div>
+      <button class="btn btn-primary" onclick="retryCurrent()">↻ Retry</button>
+    </div>`;
   }
 }
-
-function retryCurrent() {
-  if (currentItem) openDetail(currentItem.id, currentItem.type, currentItem.source);
-}
+function retryCurrent() { if (currentItem) openDetail(currentItem.id, currentItem.type, currentItem.source); }
 
 function actionButtonsHTML(trailerId) {
-  return `
-    <button class="btn btn-ghost" style="color:var(--text);border-color:var(--border)" onclick="toggleFav(currentItem)">☆ My List</button>
+  return `<button class="btn btn-ghost" style="color:var(--text);border-color:var(--border)" onclick="toggleFav(currentItem)">☆ My List</button>
     ${trailerId ? `<button class="btn btn-ghost" style="color:var(--text);border-color:var(--border)" onclick="openTrailer('${trailerId}')">▶ Trailer</button>` : ''}`;
 }
 
 function renderMovieDetail(d) {
   $('#modalTitle').textContent = d.title || 'Untitled';
-  $('#modalHero').style.backgroundImage = d.backdrop || d.poster ? `url('${d.backdrop || d.poster}')` : 'none';
+  if (d.backdrop || d.poster) $('#modalHero').style.backgroundImage = `url('${d.backdrop || d.poster}')`;
   $('#modalSub').innerHTML = [d.year && `📅 ${d.year}`, d.rating && `★ ${d.rating}`, d.runtime && `⏱ ${d.runtime}`].filter(Boolean).join('');
   $('#modalSynopsis').textContent = d.synopsis || 'No synopsis available.';
   $('#modalGenres').innerHTML = (d.genres || []).map(g => `<span class="genre-tag">${g}</span>`).join('');
   $('#actionRow').innerHTML = actionButtonsHTML(d.id);
-  $('#playerWrap').innerHTML = placeholderHTML('Ready to play', 'Click a source below to start streaming.');
-  loadSources(`/api/movie/${encodeURIComponent(d.id)}/sources`, false);
+  loadSources(`/api/movie/${encodeURIComponent(d.id)}/sources`);
 }
 
 function renderTVDetail(d) {
   $('#modalTitle').textContent = d.title || 'Untitled';
-  $('#modalHero').style.backgroundImage = d.backdrop || d.poster ? `url('${d.backdrop || d.poster}')` : 'none';
+  if (d.backdrop || d.poster) $('#modalHero').style.backgroundImage = `url('${d.backdrop || d.poster}')`;
   $('#modalSub').innerHTML = [d.year && `📅 ${d.year}`, d.rating && `★ ${d.rating}`, 'TV Series'].filter(Boolean).join('');
   $('#modalSynopsis').textContent = d.synopsis || 'No synopsis available.';
   $('#modalGenres').innerHTML = (d.genres || []).map(g => `<span class="genre-tag">${g}</span>`).join('');
   $('#actionRow').innerHTML = actionButtonsHTML(null);
-  $('#playerWrap').innerHTML = placeholderHTML('Ready to play', 'Pick an episode below to start streaming.');
   const seasons = d.seasons || [];
   if (!seasons.length) {
-    $('#epSelector').innerHTML = `<div style="color:var(--muted);padding:12px 0;font-size:13px">No seasons found.</div>`;
+    $('#playerWrap').innerHTML = `<div class="player-placeholder">
+      <div class="big-play" onclick="retryCurrent()">▶</div>
+      <div class="msg"><strong>No episodes found</strong><br>This show has no seasons listed.</div>
+      <button class="btn btn-primary" onclick="retryCurrent()">↻ Retry</button></div>`;
     return;
   }
   $('#epSelector').innerHTML = `<div style="display:flex;gap:8px;align-items:center;padding:8px 0;flex-wrap:wrap">
-    <select id="seasonSel" onchange="loadSeason('${d.id}')"
-      style="background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:8px 12px;border-radius:8px">
+    <select id="seasonSel" onchange="loadSeason('${d.id}')" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:8px 12px;border-radius:8px">
       ${seasons.map(s => `<option value="${s.number}">Season ${s.number} (${s.episodes} eps)</option>`).join('')}
     </select>
-    <span style="color:var(--muted);font-size:12px">Pick an episode below</span>
-  </div>`;
+    <span style="color:var(--muted);font-size:12px">Episodes auto-play below</span></div>`;
   loadSeason(d.id);
 }
 
@@ -628,19 +602,14 @@ async function loadSeason(id) {
   try {
     const s = await api(`/api/tv/${encodeURIComponent(id)}/season/${encodeURIComponent(season)}`);
     const eps = s.episodes || [];
-    if (!eps.length) {
-      listEl.innerHTML = `<div class="status" style="grid-column:1/-1">No episodes found for Season ${season}.</div>`;
-      return;
-    }
+    if (!eps.length) { listEl.innerHTML = `<div class="status" style="grid-column:1/-1">No episodes for Season ${season}.</div>`; return; }
     listEl.innerHTML = eps.map(e => `
-      <div class="ep-card" data-s="${season}" data-e="${e.number}" onclick="playEpisode('${id}','${season}','${e.number}',this)">
-        ${e.thumb ? `<img src="${e.thumb}" alt="" onerror="this.style.display='none'">` : `<div style="width:82px;aspect-ratio:16/9;background:var(--bg2);border-radius:5px"></div>`}
+      <div class="ep-card" onclick="playEpisode('${id}','${season}','${e.number}',this)">
+        ${e.thumb ? `<img src="${e.thumb}" onerror="this.style.display='none'">` : `<div style="width:82px;aspect-ratio:16/9;background:var(--bg2);border-radius:5px"></div>`}
         <div><div class="ep-t">E${e.number} · ${e.title || 'Untitled'}</div><div class="ep-d">${e.air_date || ''}</div></div>
       </div>`).join('');
     playEpisode(id, season, eps[0].number, listEl.querySelector('.ep-card'));
-  } catch (e) {
-    listEl.innerHTML = errorHTML(e.message, `loadSeason('${id}')`);
-  }
+  } catch (e) { listEl.innerHTML = errorHTML(e.message, `loadSeason('${id}')`); }
 }
 
 async function playEpisode(id, season, episode, cardEl) {
@@ -648,128 +617,96 @@ async function playEpisode(id, season, episode, cardEl) {
   $$('.ep-card').forEach(c => c.classList.remove('active'));
   cardEl && cardEl.classList.add('active');
   currentEp = { id, season, episode };
-  currentIsTV = true;
-  $('#playerWrap').innerHTML = placeholderHTML('Loading episode', `S${season} · E${episode}`);
+  $('#playerWrap').innerHTML = placeholderHTML('Finding stream…', `S${season} · E${episode}`);
   try {
     const d = await api(`/api/tv/${encodeURIComponent(id)}/${encodeURIComponent(season)}/${encodeURIComponent(episode)}`);
     nextInfo = d.next || null;
-    $('#modalSub').innerHTML = [d.title && `📺 ${d.title}`, d.air_date && `📅 ${d.air_date}`].filter(Boolean).join('') || $('#modalSub').innerHTML;
-    renderSources(d.sources || [], d.title, true);
+    if (d.title || d.air_date) $('#modalSub').innerHTML = [d.title && `📺 ${d.title}`, d.air_date && `📅 ${d.air_date}`].filter(Boolean).join('');
+    startAutoPlay(d.sources || [], d.title);
   } catch (e) {
-    $('#playerWrap').innerHTML = placeholderHTML('Episode load failed', 'Could not fetch episode streams.', `<div class="err">${e.message}</div>`);
+    $('#playerWrap').innerHTML = `<div class="player-placeholder">
+      <div class="big-play" onclick="playEpisode('${id}','${season}','${episode}',null)">▶</div>
+      <div class="msg"><strong>Episode load failed</strong></div>
+      <div class="err">${e.message}</div>
+      <button class="btn btn-primary" onclick="playEpisode('${id}','${season}','${episode}',null)">↻ Retry</button></div>`;
   }
 }
 
 function renderAdultDetail(d) {
   $('#modalTitle').textContent = d.title || 'Adult Video';
-  $('#modalHero').style.backgroundImage = d.thumb ? `url('${d.thumb}')` : 'none';
+  if (d.thumb) $('#modalHero').style.backgroundImage = `url('${d.thumb}')`;
   $('#modalSub').innerHTML = [d.duration && `⏱ ${d.duration}`, d.views && `👁 ${d.views}`, d.source && `source: ${d.source}`].filter(Boolean).join('');
   $('#actionRow').innerHTML = actionButtonsHTML(null);
   const src = (Array.isArray(d.sources) && d.sources.length) ? d.sources
             : (d.url ? [{ name: 'Primary', quality: 'HD', url: d.url }] : []);
-  renderSources(src, d.title, false);
+  startAutoPlay(src, d.title);
 }
 
-// ═══════════════════════════════════════════════════
-// SOURCES + PLAYER — NEVER empty
-// ═══════════════════════════════════════════════════
-async function loadSources(url, isTV) {
+async function loadSources(url) {
   try {
     const d = await api(url);
     const src = Array.isArray(d.sources) ? d.sources.filter(s => s && s.url) : [];
-    if (!src.length) throw new Error('Server returned no playable sources');
-    renderSources(src, $('#modalTitle').textContent, isTV);
+    if (!src.length) throw new Error('No playable sources returned by server');
+    startAutoPlay(src, $('#modalTitle').textContent);
   } catch (e) {
-    $('#sourcesRow').innerHTML = `<div style="width:100%">${errorHTML(e.message, 'retryCurrent()')}</div>`;
-    $('#playerWrap').innerHTML = placeholderHTML('No stream sources',
-      'The server could not return any playable URLs for this title.',
-      `<div class="err">${e.message}</div>`);
+    $('#playerWrap').innerHTML = `<div class="player-placeholder">
+      <div class="big-play" onclick="retryCurrent()">▶</div>
+      <div class="msg"><strong>No stream sources</strong><br>Could not fetch any playable URLs.</div>
+      <div class="err">${e.message}</div>
+      <button class="btn btn-primary" onclick="retryCurrent()">↻ Retry</button></div>`;
+    $('#srcPanel').innerHTML = `<button class="src-btn" onclick="retryCurrent()">↻ Refetch sources</button>`;
+    $('#srcPanel').classList.add('open');
   }
 }
 
-function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return String(u).slice(0, 24); } }
-function hostScore(u) { const h = srcHealth[hostOf(u)]; return h ? (h.ok * 2 - h.fail) : 0; }
+function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./,''); } catch { return String(u).slice(0,24); } }
+function hostScore(u) { const h = LS.get('mbx_src_health',{})[hostOf(u)]; return h ? (h.ok * 2 - h.fail) : 0; }
 function markSource(u, ok) {
+  const all = LS.get('mbx_src_health', {});
   const h = hostOf(u);
-  const r = srcHealth[h] || { ok: 0, fail: 0 };
+  const r = all[h] || { ok: 0, fail: 0 };
   ok ? r.ok++ : r.fail++;
-  srcHealth[h] = r;
-  LS.set('mbx_src_health', srcHealth);
+  all[h] = r;
+  LS.set('mbx_src_health', all);
 }
-const healthDot = s => s?.health === 'ok' ? '🟢' : s?.health === 'slow' ? '🟡' : '🔴';
 
-function renderSources(sources, title, isTV = false) {
-  currentIsTV = !!isTV;
-  const row = $('#sourcesRow');
-  const arr = Array.isArray(sources) ? sources.filter(s => s && s.url) : [];
-
-  // ALWAYS render the toggle + buttons row
-  const toggleBtn = `<button class="src-btn auto ${autoFallback ? '' : 'off'}" onclick="toggleFallback()">⚡ Auto-Fallback ${autoFallback ? 'ON' : 'OFF'}</button>`;
-
+function startAutoPlay(sources, title) {
+  const arr = (Array.isArray(sources) ? sources : []).filter(s => s && s.url);
   if (!arr.length) {
-    row.innerHTML = toggleBtn + `<div style="flex:1;padding:8px;color:var(--accent2);font-size:12.5px">⚠️ No playable sources returned for "${title || 'this title'}". Click ↻ Retry below or pick a different title.</div>
-      <button class="src-btn" onclick="retryCurrent()">↻ Retry</button>`;
-    $('#playerWrap').innerHTML = placeholderHTML('No sources available',
-      `The server returned 0 playable URLs for "${title || 'this title'}". This is usually a scraper issue on our side.`,
-      `<button class="btn btn-primary" onclick="retryCurrent()">↻ Retry</button>`);
+    $('#playerWrap').innerHTML = `<div class="player-placeholder">
+      <div class="big-play" onclick="retryCurrent()">▶</div>
+      <div class="msg"><strong>No sources for "${title || 'this title'}"</strong><br>Server returned 0 playable URLs.</div>
+      <button class="btn btn-primary" onclick="retryCurrent()">↻ Retry</button></div>`;
     return;
   }
-
-  currentSources = [...arr].sort((a, b) => hostScore(b.url) - hostScore(a.url));
-  row.innerHTML = toggleBtn + currentSources.map((s, i) => `
-    <button class="src-btn ${i === 0 ? 'active' : ''}" id="src${i}" onclick="playSource(${i})" title="${hostOf(s.url)}">
-      ${healthDot(s)} ${s.name || 'Source ' + (i + 1)}${s.quality ? ' · ' + s.quality : ''}</button>`).join('');
-  playSource(0);
+  currentSources = [...arr].sort((a, b) => {
+    const va = (a.health === 'ok' ? 0 : a.health === 'slow' ? 1 : 2) * 10000 + (a.latency || 9999);
+    const vb = (b.health === 'ok' ? 0 : b.health === 'slow' ? 1 : 2) * 10000 + (b.latency || 9999);
+    return (va - vb) || (hostScore(b.url) - hostScore(a.url));
+  });
+  renderSourcePanel();
+  trySource(0);
 }
 
-function toggleFallback() {
-  autoFallback = !autoFallback;
-  LS.set('mbx_autofb', autoFallback);
-  const b = document.querySelector('.src-btn.auto');
-  if (b) {
-    b.textContent = `⚡ Auto-Fallback ${autoFallback ? 'ON' : 'OFF'}`;
-    b.classList.toggle('off', !autoFallback);
-  }
-  showToast(`Auto-Fallback ${autoFallback ? 'enabled' : 'disabled'}`);
+function renderSourcePanel(activeIdx = -1) {
+  const p = $('#srcPanel');
+  p.innerHTML = currentSources.map((s, i) => `
+    <button class="src-btn ${i === activeIdx ? 'active' : ''}" onclick="manualSource(${i})">
+      ${s.health === 'ok' ? '🟢' : s.health === 'slow' ? '🟡' : '⚪'} ${s.name || 'Source ' + (i+1)}${s.quality ? ' · ' + s.quality : ''}</button>`).join('');
 }
+function toggleSrcPanel() { $('#srcPanel').classList.toggle('open'); }
+function manualSource(i) { clearTimeout(srcTimer); trySource(i); }
 
-function playSource(i) {
+function trySource(i) {
   const s = currentSources[i];
-  if (!s) return;
+  if (!s) { showAllFailed(); return; }
   srcIdx = i;
   clearTimeout(srcTimer);
-  $$('.src-btn[id^=src]').forEach(b => b.classList.remove('active'));
-  $('#src' + i)?.classList.add('active');
-
+  renderSourcePanel(i);
   const wrap = $('#playerWrap');
-  wrap.innerHTML = '';
   const isDirect = /\.(mp4|m3u8|webm|mkv)(\?|$)/i.test(s.url);
-
-  if (isDirect) {
-    const v = document.createElement('video');
-    v.src = s.url; v.controls = true; v.autoplay = true; v.playsInline = true;
-    v.style.cssText = 'width:100%;height:100%';
-    v.oncanplay = () => { clearTimeout(srcTimer); markSource(s.url, true); $('#srcStatus')?.remove(); };
-    v.onerror = () => failSource(s);
-    wrap.appendChild(v);
-    wrap.insertAdjacentHTML('beforeend', `<button class="pip-btn" onclick="goPiP()">⧉ PiP</button>`);
-    srcTimer = setTimeout(() => { if ($('#srcStatus')) failSource(s); }, 10000);
-  } else {
-    const f = document.createElement('iframe');
-    f.allowFullscreen = true;
-    f.allow = 'autoplay; encrypted-media; picture-in-picture';
-    f.referrerPolicy = 'no-referrer';
-    f.style.cssText = 'width:100%;height:100%;border:0';
-    let fired = false;
-    f.onload = () => { if (fired) return; fired = true; clearTimeout(srcTimer); markSource(s.url, true); $('#srcStatus')?.remove(); };
-    f.onerror = () => failSource(s);
-    f.src = s.url;
-    wrap.appendChild(f);
-    srcTimer = setTimeout(() => { if (!fired) failSource(s); }, 8000);
-  }
-
-  wrap.insertAdjacentHTML('beforeend', `
-    <div class="src-status" id="srcStatus">⏳ Trying ${s.name || 'source'} · ${hostOf(s.url)}</div>
+  wrap.innerHTML = `
+    <div class="src-status" id="srcStatus">⏳ ${i === 0 ? 'Loading stream' : `Trying another stream… ${i + 1}/${currentSources.length}`}</div>
     <div class="next-overlay" id="nextOverlay">
       <div style="font-size:36px">⏭</div>
       <h3 id="nextLabel">Next episode</h3>
@@ -778,35 +715,67 @@ function playSource(i) {
         <button class="btn btn-primary" onclick="playNextNow()">Play now</button>
         <button class="btn btn-ghost" onclick="cancelNext()">Cancel</button>
       </div>
-    </div>`);
+    </div>`;
+
+  if (isDirect) {
+    const v = document.createElement('video');
+    v.src = s.url; v.controls = true; v.autoplay = true; v.playsInline = true;
+    v.style.cssText = 'width:100%;height:100%';
+    v.oncanplay = () => markPlaying(s);
+    v.onerror = () => failSource(s);
+    wrap.appendChild(v);
+    wrap.insertAdjacentHTML('beforeend', `<button class="pip-btn" onclick="goPiP()">⧉ PiP</button>`);
+    srcTimer = setTimeout(() => failSource(s), 10000);
+  } else {
+    const f = document.createElement('iframe');
+    f.allowFullscreen = true;
+    f.allow = 'autoplay; encrypted-media; picture-in-picture';
+    f.referrerPolicy = 'no-referrer';
+    f.style.cssText = 'width:100%;height:100%;border:0';
+    let fired = false;
+    f.onload = () => { if (fired) return; fired = true; markPlaying(s); };
+    f.onerror = () => failSource(s);
+    f.src = s.url;
+    wrap.appendChild(f);
+    // junk pages load instantly → fail fast (3.5s). real players need longer → 7.5s
+    srcTimer = setTimeout(() => { if (!fired) failSource(s); }, s.health === 'ok' ? 7500 : 3500);
+  }
+}
+
+function markPlaying(s) {
+  clearTimeout(srcTimer);
+  markSource(s.url, true);
+  const st = $('#srcStatus');
+  if (st) { st.textContent = `▶ Playing · ${hostOf(s.url)}`; st.classList.add('ok'); setTimeout(() => st.remove(), 2200); }
 }
 
 function failSource(s) {
   clearTimeout(srcTimer);
   markSource(s.url, false);
-  const last = srcIdx + 1 >= currentSources.length;
-  if (autoFallback && !last) {
-    const next = currentSources[srcIdx + 1];
-    showToast(`⚠️ ${s.name || 'Source'} failed — switching to ${next.name || 'next'}`);
-    playSource(srcIdx + 1);
+  const next = srcIdx + 1;
+  if (next < currentSources.length) {
+    trySource(next);  // silent skip — no toast
     return;
   }
+  showAllFailed();
+}
+
+function showAllFailed() {
   const wrap = $('#playerWrap');
   wrap.innerHTML = `<div class="player-placeholder">
-    <div class="big-play" onclick="playSource(${srcIdx})">▶</div>
-    <div class="msg"><strong>${autoFallback ? 'All sources failed' : 'Source failed'}</strong><br>
-      Tried: ${currentSources.slice(0, srcIdx + 1).map(x => hostOf(x.url)).join(', ')}</div>
-    <div class="err">Last error: source ${s.name || hostOf(s.url)} did not respond in time</div>
+    <div class="big-play" onclick="trySource(0)">▶</div>
+    <div class="msg"><strong>All sources failed</strong><br>Tried ${currentSources.length} streams — none responded with a working player.</div>
     <div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:center">
-      ${currentSources.map((x, i) => `<button class="src-btn" onclick="playSource(${i})">${healthDot(x)} ${x.name}</button>`).join('')}
-      <button class="src-btn" onclick="retryCurrent()">↻ Refetch sources</button>
-    </div>
-  </div>`;
+      <button class="btn btn-primary" onclick="trySource(0)">▶ Try again</button>
+      <button class="btn btn-ghost" style="color:var(--text);border-color:var(--border)" onclick="retryCurrent()">↻ Refetch from server</button>
+    </div></div>`;
+  $('#srcPanel').classList.add('open');
+  renderSourcePanel(-1);
 }
 
 function goPiP() {
   const v = $('#playerWrap video');
-  if (!v) return showToast('PiP works on direct video streams only');
+  if (!v) return showToast('PiP works on direct streams');
   (document.pictureInPictureElement ? document.exitPictureInPicture() : v.requestPictureInPicture()).catch(() => showToast('PiP blocked'));
 }
 
@@ -832,28 +801,17 @@ function playNextNow() {
 }
 
 async function openTrailer(id) {
-  try {
-    const t = await api(`/api/movie/${encodeURIComponent(id)}/trailer`);
-    window.open(t.url, '_blank');
-  } catch (e) {
-    showToast('No trailer available');
-  }
+  try { const t = await api(`/api/movie/${encodeURIComponent(id)}/trailer`); window.open(t.url, '_blank'); }
+  catch { showToast('No trailer available'); }
 }
 
 function closeModal() {
   $('#modalBackdrop').classList.remove('open');
   clearTimeout(srcTimer); clearInterval(nextTimer);
-  $('#playerWrap').innerHTML = placeholderHTML('Ready', 'Click a movie to play.');
   currentItem = null;
 }
-function enterAdult() {
-  adultUnlocked = true;
-  LS.set('mbx_age_ok', 1);
-  $('#ageGate').classList.remove('open');
-  switchTab('adult');
-}
+function enterAdult() { adultUnlocked = true; LS.set('mbx_age_ok', 1); $('#ageGate').classList.remove('open'); switchTab('adult'); }
 function leaveAdult() { $('#ageGate').classList.remove('open'); goHome(); }
-
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 (async () => {
@@ -864,8 +822,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
     else { b.textContent = '📋 4K via Magnet'; b.classList.add('off'); }
   } catch {
     const b = $('#rdBadge');
-    b.textContent = '📋 4K via Magnet'; b.classList.add('off');
-  }
+    b.textContent = '📋 4K via Magnet'; b.classList.add('off'); }
 })();
 
 render();
