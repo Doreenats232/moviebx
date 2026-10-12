@@ -119,8 +119,6 @@ main{padding:20px;max-width:1440px;margin:0 auto;overflow-x:hidden}
 .src-panel.open{display:flex}
 .src-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 13px;border-radius:8px;font-size:11.5px;font-weight:600}
 .src-btn:hover,.src-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.src-btn.auto{background:var(--gold);color:#111;border-color:var(--gold)}
-.src-btn.auto.off{background:var(--bg3);color:var(--text);border-color:var(--border)}
 .next-overlay{position:absolute;inset:0;background:rgba(11,13,18,.93);display:none;flex-direction:column;align-items:center;justify-content:center;gap:13px;z-index:6;text-align:center;padding:18px}
 .next-overlay.show{display:flex}
 .action-row{display:flex;gap:8px;flex-wrap:wrap;margin:11px 0}
@@ -566,7 +564,6 @@ async function openDetail(id, type, source, title) {
       const d = await api(`/api/adult/video/${encodeURIComponent(source || 'xvideos')}/${encodeURIComponent(id)}`);
       renderAdultDetail(d);
     } else if (type === 'tv') {
-      const srcP = null;
       const d = await api(`/api/tv/${encodeURIComponent(id)}`);
       renderTVDetail(d);
     } else {
@@ -758,14 +755,13 @@ function trySource(i) {
     f.allowFullscreen = true;
     f.allow = 'autoplay; encrypted-media; picture-in-picture';
     f.referrerPolicy = 'no-referrer';
-    f.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation'); // NO allow-popups → no redirects
+    // NO sandbox attribute — embed players detect it and refuse to play
     f.style.cssText = 'width:100%;height:100%;border:0';
     let fired = false;
     f.onload = () => { if (fired) return; fired = true; markPlaying(s); };
     f.onerror = () => failSource(s);
     f.src = s.url;
     wrap.appendChild(f);
-    // fail-fast: junk loads instantly (3.2s), verified players get 5.5s
     srcTimer = setTimeout(() => { if (!fired) failSource(s); }, s.health === 'ok' ? 5500 : 3200);
   }
 }
