@@ -7,10 +7,10 @@ const BACKDROP = 'https://image.tmdb.org/t/p/w1280';
 const STILL = 'https://image.tmdb.org/t/p/w300';
 
 const TV_PROVIDERS = [
+  { name: 'Embed.su',     quality: '1080p', tv: (id, s, e) => `https://embed.su/embed/tv/${id}/${s}/${e}` },
+  { name: 'VidSrc.cc',    quality: '1080p', tv: (id, s, e) => `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}` },
   { name: 'VidSrc.xyz',   quality: '1080p', tv: (id, s, e) => `https://vidsrc.xyz/embed/tv/${id}/${s}/${e}` },
   { name: 'VidSrc',       quality: '1080p', tv: (id, s, e) => `https://vidsrc.to/embed/tv/${id}/${s}/${e}` },
-  { name: 'VidSrc.cc',    quality: '1080p', tv: (id, s, e) => `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}` },
-  { name: 'Embed.su',     quality: '1080p', tv: (id, s, e) => `https://embed.su/embed/tv/${id}/${s}/${e}` },
   { name: 'VidLink',      quality: '1080p', tv: (id, s, e) => `https://vidlink.pro/tv/${id}/${s}/${e}` },
   { name: 'AutoEmbed',    quality: '1080p', tv: (id, s, e) => `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}` },
   { name: 'VidSrc.net',   quality: '1080p', tv: (id, s, e) => `https://vidsrc.net/embed/tv/${id}/${s}/${e}` },
@@ -22,6 +22,8 @@ const TV_PROVIDERS = [
 
 const JUNK_RE = /domain is for sale|parked|godaddy|sedo\.com|buy this domain|404 not found|video not found|no video|this video (has been|is) removed|<title>\s*news|latest news|blog post|article/i;
 const PLAYER_RE = /(player|video|iframe|embed|jwplayer|videojs|\.mp4|\.m3u8|stream|play)/i;
+const probeCache = new Map();
+const CACHE_TTL = 10 * 60 * 1000;
 
 function tmdb(path, params = {}) {
   return axios.get(`${TMDB}${path}`, {
@@ -29,7 +31,6 @@ function tmdb(path, params = {}) {
     timeout: 15000
   }).then(r => r.data);
 }
-
 function mapShow(t) {
   return {
     id: t.id,
@@ -41,12 +42,18 @@ function mapShow(t) {
     overview: t.overview || ''
   };
 }
+function hostOf(u) { try { return new URL(u).hostname; } catch { return ''; } }
 
 async function probeSource(s) {
+  const host = hostOf(s.url);
+  const hit = probeCache.get(host);
+  if (hit && Date.now() - hit.at < CACHE_TTL) {
+    return hit.ok ? { ...s, latency: hit.latency || 1, health: 'ok' } : null;
+  }
   const t0 = Date.now();
   try {
     const r = await axios.get(s.url, {
-      timeout: 2200,
+      timeout: 1600,
       maxRedirects: 3,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122 Safari/537.36',
@@ -56,15 +63,17 @@ async function probeSource(s) {
     });
     const body = String(r.data || '');
     const latency = Date.now() - t0;
-    if (r.status >= 400 || body.length < 200) return null;
-    if (JUNK_RE.test(body)) return null;
-    if (!PLAYER_RE.test(body)) return null;
-    return { ...s, latency, health: latency < 1200 ? 'ok' : 'slow' };
-  } catch { return null; }
+    const ok = !(r.status >= 400 || body.length < 200 || JUNK_RE.test(body) || !PLAYER_RE.test(body));
+    probeCache.set(host, { at: Date.now(), ok, latency });
+    return ok ? { ...s, latency, health: latency < 1200 ? 'ok' : 'slow' } : null;
+  } catch {
+    probeCache.set(host, { at: Date.now(), ok: false });
+    return null;
+  }
 }
 
 async function buildSources(rawList) {
-  const valid = (Array.isArray(rawList) ? rawList : []).filter(s => s && s.url);
+  const valid = (Array.isArray(rawList) ? rawList : []).filter(s => s && s.url).slice(0, 12);
   const results = await Promise.allSettled(valid.map(probeSource));
   const verified = results.map(r => r.status === 'fulfilled' ? r.value : null).filter(Boolean);
   verified.sort((a, b) => (a.latency || 0) - (b.latency || 0));
@@ -77,12 +86,10 @@ async function getTrending(page = 1) {
   const d = await tmdb('/trending/tv/week', { page });
   return (d.results || []).map(mapShow);
 }
-
 async function search(q, page = 1) {
   const d = await tmdb('/search/tv', { query: q, page });
   return (d.results || []).map(mapShow);
 }
-
 async function getDetails(id) {
   const t = await tmdb(`/tv/${id}`);
   return {
@@ -99,7 +106,6 @@ async function getDetails(id) {
       .map(s => ({ number: s.season_number, episodes: s.episode_count || 0, name: s.name || `Season ${s.season_number}` }))
   };
 }
-
 async function getSeason(id, season) {
   const s = await tmdb(`/tv/${id}/season/${season}`);
   return {
@@ -113,7 +119,6 @@ async function getSeason(id, season) {
     }))
   };
 }
-
 async function getEpisodeStream(id, season, episode) {
   const ep = await tmdb(`/tv/${id}/season/${season}/episode/${episode}`).catch(() => ({}));
   const raw = [];
@@ -127,8 +132,8 @@ async function getEpisodeStream(id, season, episode) {
   let sources = await buildSources(raw);
   if (!sources.length) {
     sources = [
-      { name: 'VidSrc.xyz', quality: '1080p', url: `https://vidsrc.xyz/embed/tv/${id}/${season}/${episode}`, health: 'ok', latency: 0 },
-      { name: 'VidSrc', quality: '1080p', url: `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`, health: 'ok', latency: 0 }
+      { name: 'Embed.su', quality: '1080p', url: `https://embed.su/embed/tv/${id}/${season}/${episode}`, health: 'ok', latency: 0 },
+      { name: 'VidSrc.cc', quality: '1080p', url: `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`, health: 'ok', latency: 0 }
     ];
   }
   return {
