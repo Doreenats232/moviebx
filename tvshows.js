@@ -7,18 +7,21 @@ const BACKDROP = 'https://image.tmdb.org/t/p/w1280';
 const STILL = 'https://image.tmdb.org/t/p/w300';
 
 const TV_PROVIDERS = [
-  { name: 'VidSrc',       quality: '1080p', tv: (id, s, e) => `https://vidsrc.to/embed/tv/${id}/${s}/${e}` },
   { name: 'VidSrc.xyz',   quality: '1080p', tv: (id, s, e) => `https://vidsrc.xyz/embed/tv/${id}/${s}/${e}` },
+  { name: 'VidSrc',       quality: '1080p', tv: (id, s, e) => `https://vidsrc.to/embed/tv/${id}/${s}/${e}` },
   { name: 'VidSrc.cc',    quality: '1080p', tv: (id, s, e) => `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}` },
-  { name: 'VidSrc.net',   quality: '1080p', tv: (id, s, e) => `https://vidsrc.net/embed/tv/${id}/${s}/${e}` },
   { name: 'Embed.su',     quality: '1080p', tv: (id, s, e) => `https://embed.su/embed/tv/${id}/${s}/${e}` },
   { name: 'VidLink',      quality: '1080p', tv: (id, s, e) => `https://vidlink.pro/tv/${id}/${s}/${e}` },
+  { name: 'AutoEmbed',    quality: '1080p', tv: (id, s, e) => `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}` },
+  { name: 'VidSrc.net',   quality: '1080p', tv: (id, s, e) => `https://vidsrc.net/embed/tv/${id}/${s}/${e}` },
   { name: '2Embed',       quality: '1080p', tv: (id, s, e) => `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}` },
   { name: 'MultiEmbed',   quality: '1080p', tv: (id, s, e) => `https://multiembed.mov/?video_id=${id}&s=${s}&e=${e}` },
-  { name: 'AutoEmbed',    quality: '1080p', tv: (id, s, e) => `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}` },
   { name: 'SmashyStream', quality: '1080p', tv: (id, s, e) => `https://player.smashystream.com/tv/${id}/${s}/${e}` },
   { name: 'VidEasy',      quality: '1080p', tv: (id, s, e) => `https://player.videasy.to/tv/${id}/${s}/${e}` }
 ];
+
+const JUNK_RE = /domain is for sale|parked|godaddy|sedo\.com|buy this domain|404 not found|video not found|no video|this video (has been|is) removed|<title>\s*news|latest news|blog post|article/i;
+const PLAYER_RE = /(player|video|iframe|embed|jwplayer|videojs|\.mp4|\.m3u8|stream|play)/i;
 
 function tmdb(path, params = {}) {
   return axios.get(`${TMDB}${path}`, {
@@ -37,6 +40,37 @@ function mapShow(t) {
     rating: t.vote_average ? Math.round(t.vote_average * 10) / 10 : null,
     overview: t.overview || ''
   };
+}
+
+async function probeSource(s) {
+  const t0 = Date.now();
+  try {
+    const r = await axios.get(s.url, {
+      timeout: 2200,
+      maxRedirects: 3,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122 Safari/537.36',
+        'Referer': 'https://www.google.com/'
+      },
+      validateStatus: () => true
+    });
+    const body = String(r.data || '');
+    const latency = Date.now() - t0;
+    if (r.status >= 400 || body.length < 200) return null;
+    if (JUNK_RE.test(body)) return null;
+    if (!PLAYER_RE.test(body)) return null;
+    return { ...s, latency, health: latency < 1200 ? 'ok' : 'slow' };
+  } catch { return null; }
+}
+
+async function buildSources(rawList) {
+  const valid = (Array.isArray(rawList) ? rawList : []).filter(s => s && s.url);
+  const results = await Promise.allSettled(valid.map(probeSource));
+  const verified = results.map(r => r.status === 'fulfilled' ? r.value : null).filter(Boolean);
+  verified.sort((a, b) => (a.latency || 0) - (b.latency || 0));
+  const vUrls = new Set(verified.map(v => v.url));
+  const unverified = valid.filter(v => !vUrls.has(v.url)).map(v => ({ ...v, latency: 9999, health: 'unknown' }));
+  return [...verified, ...unverified].slice(0, 10);
 }
 
 async function getTrending(page = 1) {
@@ -81,21 +115,21 @@ async function getSeason(id, season) {
 }
 
 async function getEpisodeStream(id, season, episode) {
-  const ep = await tmdb(`/tv/${id}/season/${season}/episode/${episode}`);
-  const sources = [];
+  const ep = await tmdb(`/tv/${id}/season/${season}/episode/${episode}`).catch(() => ({}));
+  const raw = [];
   for (const p of TV_PROVIDERS) {
     try {
       if (typeof p.tv !== 'function') continue;
       const url = p.tv(id, season, episode);
-      if (!url) continue;
-      sources.push({ name: p.name, quality: p.quality || 'HD', url, health: 'ok', latency: 0 });
+      if (url) raw.push({ name: p.name, quality: p.quality || 'HD', url });
     } catch (e) {}
   }
+  let sources = await buildSources(raw);
   if (!sources.length) {
-    sources.push(
-      { name: 'VidSrc', quality: '1080p', url: `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`, health: 'ok', latency: 0 },
-      { name: 'VidSrc.xyz', quality: '1080p', url: `https://vidsrc.xyz/embed/tv/${id}/${season}/${episode}`, health: 'ok', latency: 0 }
-    );
+    sources = [
+      { name: 'VidSrc.xyz', quality: '1080p', url: `https://vidsrc.xyz/embed/tv/${id}/${season}/${episode}`, health: 'ok', latency: 0 },
+      { name: 'VidSrc', quality: '1080p', url: `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`, health: 'ok', latency: 0 }
+    ];
   }
   return {
     title: ep.name || `S${season}E${episode}`,
