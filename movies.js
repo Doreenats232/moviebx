@@ -1,31 +1,50 @@
 const axios = require('axios');
+
+const TMDB_KEY = process.env.TMDB_API_KEY || '2dca580c2a14b55200e784d157207b4d';
 const TMDB = 'https://api.themoviedb.org/3';
-const KEY = process.env.TMDB_API_KEY || '2dca580c2a14b55200e784d157207b4d';
+const IMG = 'https://image.tmdb.org/t/p/w500';
+const BACKDROP = 'https://image.tmdb.org/t/p/w1280';
 
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36';
+const GENRES = {
+  action: 28, comedy: 35, horror: 27, romance: 10749, 'sci-fi': 878, thriller: 53,
+  drama: 18, animation: 16, fantasy: 14, adventure: 12, crime: 80, mystery: 9648
+};
 
-const GENRE = { action:28, adventure:12, animation:16, comedy:35, crime:80, drama:18, fantasy:14, horror:27, romance:10749, 'sci-fi':878, thriller:53, mystery:9648, war:10752, western:37, documentary:99, family:10751, music:10402, history:36 };
+const PROVIDERS = [
+  { name: 'VidSrc',       quality: '1080p', movie: id => `https://vidsrc.to/embed/movie/${id}` },
+  { name: 'VidSrc.xyz',   quality: '1080p', movie: id => `https://vidsrc.xyz/embed/movie/${id}` },
+  { name: 'VidSrc.cc',    quality: '1080p', movie: id => `https://vidsrc.cc/v2/embed/movie/${id}` },
+  { name: 'VidSrc.net',   quality: '1080p', movie: id => `https://vidsrc.net/embed/movie/${id}` },
+  { name: 'VidSrc.pro',   quality: '1080p', movie: id => `https://vidsrc.pro/embed/movie/${id}` },
+  { name: 'Embed.su',     quality: '1080p', movie: id => `https://embed.su/embed/${id}` },
+  { name: 'VidLink',      quality: '1080p', movie: id => `https://vidlink.pro/movie/${id}` },
+  { name: '2Embed.cc',    quality: '1080p', movie: id => `https://www.2embed.cc/embed/${id}` },
+  { name: '2Embed.me',    quality: '1080p', movie: id => `https://www.2embed.me/embed/${id}` },
+  { name: 'MultiEmbed',   quality: '1080p', movie: id => `https://multiembed.mov/?video_id=${id}` },
+  { name: 'AutoEmbed',    quality: '1080p', movie: id => `https://player.autoembed.cc/embed/movie/${id}` },
+  { name: 'SmashyStream', quality: '1080p', movie: id => `https://player.smashystream.com/movie/${id}` },
+  { name: '23Embed',      quality: '720p',  movie: id => `https://23embed.com/embed/${id}` },
+  { name: 'VidEasy',      quality: '1080p', movie: id => `https://player.videasy.to/movie/${id}` },
+  { name: 'RuVid',        quality: '720p',  movie: id => `https://ruvid.net/embed/${id}` }
+];
 
-const img = (p, size = 'w500') => p ? `https://image.tmdb.org/t/p/${size}${p}` : null;
+function tmdb(path, params = {}) {
+  return axios.get(`${TMDB}${path}`, {
+    params: { api_key: TMDB_KEY, language: 'en-US', include_adult: true, ...params },
+    timeout: 15000
+  }).then(r => r.data);
+}
 
 function mapMovie(m) {
   return {
     id: m.id,
-    title: m.title || m.name,
-    poster: img(m.poster_path),
-    backdrop: img(m.backdrop_path, 'w1280'),
+    title: m.title || m.name || 'Untitled',
+    poster: m.poster_path ? `${IMG}${m.poster_path}` : null,
+    backdrop: m.backdrop_path ? `${BACKDROP}${m.backdrop_path}` : null,
     year: (m.release_date || m.first_air_date || '').slice(0, 4),
     rating: m.vote_average ? Math.round(m.vote_average * 10) / 10 : null,
-    overview: m.overview
+    overview: m.overview || ''
   };
-}
-
-async function tmdb(path, params = {}) {
-  const { data } = await axios.get(`${TMDB}${path}`, {
-    params: { api_key: KEY, language: 'en-US', ...params },
-    timeout: 15000
-  });
-  return data;
 }
 
 async function getTrending(page = 1) {
@@ -34,15 +53,14 @@ async function getTrending(page = 1) {
 }
 
 async function search(q, page = 1) {
-  const d = await tmdb('/search/movie', { query: q, page, include_adult: true });
+  const d = await tmdb('/search/movie', { query: q, page });
   return (d.results || []).map(mapMovie);
 }
 
-async function getByGenre(name, page = 1) {
-  const id = GENRE[String(name).toLowerCase()] || 28;
-  const d = await tmdb('/discover/movie', {
-    with_genres: id, page, sort_by: 'popularity.desc', include_adult: true
-  });
+async function getByGenre(genre, page = 1) {
+  const id = GENRES[String(genre).toLowerCase()];
+  if (!id) return [];
+  const d = await tmdb('/discover/movie', { with_genres: id, page, sort_by: 'popularity.desc' });
   return (d.results || []).map(mapMovie);
 }
 
@@ -50,95 +68,49 @@ async function getDetails(id) {
   const m = await tmdb(`/movie/${id}`);
   return {
     id: m.id,
-    title: m.title,
-    poster: img(m.poster_path),
-    backdrop: img(m.backdrop_path, 'w1280'),
+    title: m.title || 'Untitled',
     year: (m.release_date || '').slice(0, 4),
     rating: m.vote_average ? Math.round(m.vote_average * 10) / 10 : null,
     runtime: m.runtime ? `${m.runtime} min` : null,
     genres: (m.genres || []).map(g => g.name),
-    synopsis: m.overview,
+    synopsis: m.overview || 'No synopsis available.',
+    poster: m.poster_path ? `${IMG}${m.poster_path}` : null,
+    backdrop: m.backdrop_path ? `${BACKDROP}${m.backdrop_path}` : null,
     quality: 'HD'
   };
 }
 
-async function getTrailer(id) {
-  const v = await tmdb(`/movie/${id}/videos`);
-  const list = v.results || [];
-  const t = list.find(x => x.site === 'YouTube' && x.type === 'Trailer') || list[0];
-  return t ? { key: t.key, url: `https://www.youtube.com/embed/${t.key}?autoplay=1` } : null;
-}
-
-// ═══════════════════════════════════════════════════════════
-// 18-PROVIDER POOL  (expand by appending to this array)
-// ═══════════════════════════════════════════════════════════
-const PROVIDERS = [
-  { name: 'VidSrc',       quality: 'HD',  movie: id => `https://vidsrc.to/embed/movie/${id}` },
-  { name: 'VidSrc XYZ',   quality: 'HD',  movie: id => `https://vidsrc.xyz/embed/movie/${id}` },
-  { name: 'VidSrc CC',    quality: 'HD',  movie: id => `https://vidsrc.cc/v2/embed/movie/${id}` },
-  { name: 'VidSrc Net',   quality: 'HD',  movie: id => `https://vidsrc.net/embed/movie/${id}` },
-  { name: 'VidSrc Pro',   quality: 'HD',  movie: id => `https://vidsrc.pro/embed/movie/${id}` },
-  { name: 'VidSrc Stream',quality: 'HD',  movie: id => `https://vidsrc.stream/embed/movie/${id}` },
-  { name: 'Embed.su',     quality: 'HD',  movie: id => `https://embed.su/embed/movie/${id}` },
-  { name: 'VidLink',      quality: 'HD',  movie: id => `https://vidlink.pro/movie/${id}` },
-  { name: '2Embed',       quality: 'HD',  movie: id => `https://www.2embed.cc/embedtmdb/${id}` },
-  { name: '2Embed Me',    quality: 'HD',  movie: id => `https://www.2embed.me/embed/${id}` },
-  { name: 'MultiEmbed',   quality: 'HD',  movie: id => `https://multiembed.mov/?video_id=${id}&tmdb=1` },
-  { name: 'AutoEmbed',    quality: 'HD',  movie: id => `https://player.autoembed.cc/embed/movie/${id}` },
-  { name: 'SmashyStream', quality: 'HD',  movie: id => `https://player.smashystream.com/movie/${id}` },
-  { name: '23Embed',      quality: 'HD',  movie: id => `https://www.23embed.com/movie/${id}` },
-  { name: 'FilmEmbed',    quality: 'HD',  movie: id => `https://www.filmembed.com/embed/movie/${id}` },
-  { name: 'MoviesAPI',    quality: 'CAM', movie: id => `https://moviesapi.club/${id}` },
-  { name: 'VidEasy',      quality: 'HD',  movie: id => `https://player.videasy.to/movie/${id}` },
-  { name: 'RuVid',        quality: 'HD',  movie: id => `https://ruvid.net/embed/movie/${id}` }
-];
-
-// ═══════════════════════════════════════════════════════════
-// SOURCE HEALTH PROBE  (feature #11)
-// ═══════════════════════════════════════════════════════════
-const healthCache = new Map();
-const TTL = 10 * 60 * 1000;
-
-async function probeHost(url) {
-  let host;
-  try { host = new URL(url).hostname; } catch { return { health: 'down', latency: 9999 }; }
-  const hit = healthCache.get(host);
-  if (hit && Date.now() - hit.at < TTL) return hit;
-
-  const started = Date.now();
-  let health = 'down';
-  try {
-    await axios.get(url, {
-      timeout: 3000,
-      maxRedirects: 5,
-      headers: { 'User-Agent': UA, 'Accept': 'text/html,application/xhtml+xml' },
-      validateStatus: s => s < 500
-    });
-    health = 'ok';
-  } catch (e) {
-    health = e.code === 'ECONNABORTED' ? 'slow' : 'down';
-  }
-
-  const latency = Date.now() - started;
-  if (health === 'ok' && latency > 3000) health = 'slow';
-  const rec = { health, latency, at: Date.now() };
-  healthCache.set(host, rec);
-  return rec;
-}
-
-const RANK = { ok: 0, slow: 1, down: 2 };
-
-async function rankSources(sources) {
-  const probes = await Promise.all(
-    sources.map(s => probeHost(s.url).catch(() => ({ health: 'down', latency: 9999 })))
-  );
-  return sources
-    .map((s, i) => ({ ...s, health: probes[i].health, latency: probes[i].latency }))
-    .sort((a, b) => (RANK[a.health] - RANK[b.health]) || (a.latency - b.latency));
-}
-
 async function getStreamSources(id) {
-  return rankSources(PROVIDERS.map(p => ({ name: p.name, quality: p.quality, url: p.movie(id) })));
+  const out = [];
+  for (const p of PROVIDERS) {
+    try {
+      if (typeof p.movie !== 'function') continue;
+      const url = p.movie(id);
+      if (!url) continue;
+      out.push({ name: p.name, quality: p.quality || 'HD', url, health: 'ok', latency: 0 });
+    } catch (e) { /* skip broken provider */ }
+  }
+  // HARD FALLBACK — never return []
+  if (!out.length) {
+    out.push(
+      { name: 'VidSrc', quality: '1080p', url: `https://vidsrc.to/embed/movie/${id}`, health: 'ok', latency: 0 },
+      { name: 'VidSrc.xyz', quality: '1080p', url: `https://vidsrc.xyz/embed/movie/${id}`, health: 'ok', latency: 0 },
+      { name: 'Embed.su', quality: '1080p', url: `https://embed.su/embed/${id}`, health: 'ok', latency: 0 }
+    );
+  }
+  return out;
 }
 
-module.exports = { getTrending, search, getByGenre, getDetails, getTrailer, getStreamSources };
+async function getTrailer(id) {
+  const d = await tmdb(`/movie/${id}/videos`);
+  const t = (d.results || []).find(v => v.site === 'YouTube' && v.type === 'Trailer')
+         || (d.results || []).find(v => v.site === 'YouTube');
+  return t ? { url: `https://www.youtube.com/embed/${t.key}?autoplay=1`, name: t.name } : null;
+}
+
+async function getSimilar(id) {
+  const d = await tmdb(`/movie/${id}/similar`);
+  return (d.results || []).map(mapMovie);
+}
+
+module.exports = { getTrending, search, getByGenre, getDetails, getStreamSources, getTrailer, getSimilar, PROVIDERS };
