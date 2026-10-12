@@ -1,205 +1,162 @@
 const express = require('express');
-const path = require('path');
-const Database = require('better-sqlite3');
 const cors = require('cors');
+const path = require('path');
 const fs = require('fs');
 
+// Ensure data directory exists BEFORE opening the DB
+const DATA_DIR = path.join(__dirname, 'data');
+fs.mkdirSync(DATA_DIR, { recursive: true });
+
+// FLAT REPO: require from root, not from scrapers/
+const movies = require('./movies');
+const tvshows = require('./tvshows');
+const adult = require('./adult');
+
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// ─── Ensure data directory exists ────────────────────────────────
-const dataDir = path.join(__dirname, 'data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
-
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-// ─── SQLite Cache ───────────────────────────────────────────────
-const db = new Database(path.join(dataDir, 'cache.db'));
-db.pragma('journal_mode = WAL');
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS cache (
-    key TEXT PRIMARY KEY,
-    value TEXT,
-    fetched_at TEXT DEFAULT (datetime('now'))
-  )
-`);
-
-function getCached(key) {
-  const row = db.prepare('SELECT value FROM cache WHERE key = ?').get(key);
-  return row ? JSON.parse(row.value) : null;
+// ─── Cache (SQLite with in-memory fallback) ─────────────────────
+let cache;
+try {
+  const Database = require('better-sqlite3');
+  const db = new Database(path.join(DATA_DIR, 'cache.db'));
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS cache (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+  `);
+  cache = {
+    get: (k) => {
+      const row = db.prepare('SELECT value FROM cache WHERE key = ?').get(k);
+      return row ? JSON.parse(row.value) : null;
+    },
+    set: (k, v) => {
+      db.prepare(`
+        INSERT INTO cache (key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value, created_at = datetime('now')
+      `).run(k, JSON.stringify(v));
+    }
+  };
+} catch (e) {
+  console.warn('SQLite cache unavailable, using memory:', e.message);
+  const mem = new Map();
+  cache = {
+    get: (k) => mem.get(k) || null,
+    set: (k, v) => mem.set(k, v)
+  };
 }
 
-function setCache(key, value) {
-  db.prepare("INSERT OR REPLACE INTO cache (key, value, fetched_at) VALUES (?, ?, datetime('now'))").run(key, JSON.stringify(value));
+async function cached(key, fetcher) {
+  const hit = cache.get(key);
+  if (hit) return hit;
+  const data = await fetcher();
+  cache.set(key, data);
+  return data;
 }
 
-function cleanOldCache() {
-  db.prepare("DELETE FROM cache WHERE fetched_at < datetime('now', '-6 hours')").run();
-}
-setInterval(cleanOldCache, 60 * 60 * 1000);
-
-// ─── Scrapers ───────────────────────────────────────────────────
-const movies = require('./scrapers/movies');
-const tvshows = require('./scrapers/tvshows');
-const adult = require('./scrapers/adult');
-
-// ─── MOVIES ─────────────────────────────────────────────────────
-app.get('/api/trending', async (req, res) => {
-  try {
-    const cached = getCached('trending');
-    if (cached) return res.json(cached);
-    const data = await movies.getTrending();
-    setCache('trending', data);
-    res.json(data);
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch trending' }); }
+// ─── Static assets (whitelist extensions to protect source) ────
+app.use((req, res, next) => {
+  if (/\.(css|js|png|jpe?g|gif|svg|ico|woff2?|ttf|mp4|webm|json)$/i.test(req.path)) {
+    return res.sendFile(path.join(__dirname, req.path), err => {
+      if (err) res.status(404).end();
+    });
+  }
+  next();
 });
 
-app.get('/api/search', async (req, res) => {
+// ─── MOVIES ─────────────────────────────────────────────────────
+app.get('/api/movies/trending', async (req, res) => {
+  try {
+    res.json({ results: await cached('movies:trending', () => movies.getTrending()) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/movies/search', async (req, res) => {
   try {
     const q = req.query.q || '';
-    if (!q.trim()) return res.json([]);
-    const cacheKey = `search:${q.toLowerCase()}`;
-    const cached = getCached(cacheKey);
-    if (cached) return res.json(cached);
-    const data = await movies.search(q);
-    setCache(cacheKey, data);
-    res.json(data);
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Search failed' }); }
+    res.json({ results: await cached(`movies:search:${q}`, () => movies.search(q)) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/movies/genre/:name', async (req, res) => {
+  try {
+    const { name } = req.params;
+    const page = req.query.page || 1;
+    res.json({ results: await cached(`movies:genre:${name}:${page}`, () => movies.getByGenre(name, page)) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/api/movie/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const cacheKey = `movie:${id}`;
-    const cached = getCached(cacheKey);
-    if (cached) return res.json(cached);
-    const data = await movies.getDetails(id);
-    setCache(cacheKey, data);
-    res.json(data);
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch movie details' }); }
+    res.json(await cached(`movie:${req.params.id}`, () => movies.getDetails(req.params.id)));
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/genre/:name', async (req, res) => {
+app.get('/api/movie/:id/sources', async (req, res) => {
   try {
-    const { name } = req.params;
-    const page = req.query.page || 1;
-    const cacheKey = `genre:${name}:${page}`;
-    const cached = getCached(cacheKey);
-    if (cached) return res.json(cached);
-    const data = await movies.getByGenre(name, page);
-    setCache(cacheKey, data);
-    res.json(data);
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch genre' }); }
+    res.json(await cached(`movie:sources:${req.params.id}`, () => movies.getStreamSources(req.params.id)));
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/movie/:id/stream', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const cacheKey = `stream:movie:${id}`;
-    const cached = getCached(cacheKey);
-    if (cached) return res.json(cached);
-    const data = await movies.getStreamSources(id);
-    setCache(cacheKey, data);
-    res.json(data);
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch stream' }); }
-});
-
-// ─── TV SHOWS ───────────────────────────────────────────────────
+// ─── TV ─────────────────────────────────────────────────────────
 app.get('/api/tv/trending', async (req, res) => {
   try {
-    const cached = getCached('tv_trending');
-    if (cached) return res.json(cached);
-    const data = await tvshows.getTrending();
-    setCache('tv_trending', data);
-    res.json(data);
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch TV trending' }); }
+    res.json({ results: await cached('tv:trending', () => tvshows.getTrending()) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/api/tv/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const cacheKey = `tv:${id}`;
-    const cached = getCached(cacheKey);
-    if (cached) return res.json(cached);
-    const data = await tvshows.getDetails(id);
-    setCache(cacheKey, data);
-    res.json(data);
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch TV details' }); }
+    res.json(await cached(`tv:${req.params.id}`, () => tvshows.getDetails(req.params.id)));
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/api/tv/:id/:season/:episode', async (req, res) => {
   try {
     const { id, season, episode } = req.params;
-    const cacheKey = `tv:stream:${id}:${season}:${episode}`;
-    const cached = getCached(cacheKey);
-    if (cached) return res.json(cached);
-    const data = await tvshows.getEpisodeStream(id, season, episode);
-    setCache(cacheKey, data);
-    res.json(data);
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch episode stream' }); }
+    res.json(await cached(`tv:${id}:${season}:${episode}`, () => tvshows.getEpisodeStream(id, season, episode)));
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ─── ADULT (18+) ────────────────────────────────────────────────
+// ─── ADULT ──────────────────────────────────────────────────────
+app.get('/api/adult/trending', async (req, res) => {
+  try {
+    const page = req.query.page || 1;
+    res.json({ results: await cached(`adult:trending:${page}`, () => adult.getTrending(page)) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('/api/adult/search', async (req, res) => {
   try {
     const q = req.query.q || '';
     const page = req.query.page || 1;
-    const cacheKey = `adult:search:${q.toLowerCase()}:${page}`;
-    const cached = getCached(cacheKey);
-    if (cached) return res.json(cached);
-    const data = await adult.search(q, page);
-    setCache(cacheKey, data);
-    res.json(data);
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Adult search failed' }); }
-});
-
-app.get('/api/adult/trending', async (req, res) => {
-  try {
-    const page = req.query.page || 1;
-    const cacheKey = `adult:trending:${page}`;
-    const cached = getCached(cacheKey);
-    if (cached) return res.json(cached);
-    const data = await adult.getTrending(page);
-    setCache(cacheKey, data);
-    res.json(data);
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch adult trending' }); }
+    res.json({ results: await cached(`adult:search:${q}:${page}`, () => adult.search(q, page)) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/api/adult/category/:name', async (req, res) => {
   try {
-    const { name } = req.params;
     const page = req.query.page || 1;
-    const cacheKey = `adult:cat:${name}:${page}`;
-    const cached = getCached(cacheKey);
-    if (cached) return res.json(cached);
-    const data = await adult.getByCategory(name, page);
-    setCache(cacheKey, data);
-    res.json(data);
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch adult category' }); }
+    res.json({ results: await cached(`adult:cat:${req.params.name}:${page}`, () => adult.getByCategory(req.params.name, page)) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/api/adult/video/:source/:id', async (req, res) => {
   try {
     const { source, id } = req.params;
-    const cacheKey = `adult:video:${source}:${id}`;
-    const cached = getCached(cacheKey);
-    if (cached) return res.json(cached);
-    const data = await adult.getVideo(source, id);
-    setCache(cacheKey, data);
-    res.json(data);
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to fetch adult video' }); }
+    res.json(await cached(`adult:video:${source}:${id}`, () => adult.getVideo(source, id)));
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ─── SPA Fallback ───────────────────────────────────────────────
+// ─── Frontend fallback ──────────────────────────────────────────
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`MovieBX running on port ${PORT}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`MovieBox running on http://localhost:${PORT}`);
 });
