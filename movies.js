@@ -11,22 +11,25 @@ const GENRES = {
 };
 
 const PROVIDERS = [
-  { name: 'VidSrc',       quality: '1080p', movie: id => `https://vidsrc.to/embed/movie/${id}` },
   { name: 'VidSrc.xyz',   quality: '1080p', movie: id => `https://vidsrc.xyz/embed/movie/${id}` },
+  { name: 'VidSrc',       quality: '1080p', movie: id => `https://vidsrc.to/embed/movie/${id}` },
   { name: 'VidSrc.cc',    quality: '1080p', movie: id => `https://vidsrc.cc/v2/embed/movie/${id}` },
-  { name: 'VidSrc.net',   quality: '1080p', movie: id => `https://vidsrc.net/embed/movie/${id}` },
-  { name: 'VidSrc.pro',   quality: '1080p', movie: id => `https://vidsrc.pro/embed/movie/${id}` },
   { name: 'Embed.su',     quality: '1080p', movie: id => `https://embed.su/embed/${id}` },
   { name: 'VidLink',      quality: '1080p', movie: id => `https://vidlink.pro/movie/${id}` },
-  { name: '2Embed.cc',    quality: '1080p', movie: id => `https://www.2embed.cc/embed/${id}` },
-  { name: '2Embed.me',    quality: '1080p', movie: id => `https://www.2embed.me/embed/${id}` },
-  { name: 'MultiEmbed',   quality: '1080p', movie: id => `https://multiembed.mov/?video_id=${id}` },
   { name: 'AutoEmbed',    quality: '1080p', movie: id => `https://player.autoembed.cc/embed/movie/${id}` },
+  { name: 'VidSrc.net',   quality: '1080p', movie: id => `https://vidsrc.net/embed/movie/${id}` },
+  { name: '2Embed.cc',    quality: '1080p', movie: id => `https://www.2embed.cc/embed/${id}` },
+  { name: 'MultiEmbed',   quality: '1080p', movie: id => `https://multiembed.mov/?video_id=${id}` },
   { name: 'SmashyStream', quality: '1080p', movie: id => `https://player.smashystream.com/movie/${id}` },
-  { name: '23Embed',      quality: '720p',  movie: id => `https://23embed.com/embed/${id}` },
+  { name: '2Embed.me',    quality: '1080p', movie: id => `https://www.2embed.me/embed/${id}` },
+  { name: 'VidSrc.pro',   quality: '1080p', movie: id => `https://vidsrc.pro/embed/movie/${id}` },
   { name: 'VidEasy',      quality: '1080p', movie: id => `https://player.videasy.to/movie/${id}` },
+  { name: '23Embed',      quality: '720p',  movie: id => `https://23embed.com/embed/${id}` },
   { name: 'RuVid',        quality: '720p',  movie: id => `https://ruvid.net/embed/${id}` }
 ];
+
+const JUNK_RE = /domain is for sale|parked|godaddy|sedo\.com|buy this domain|404 not found|video not found|no video|this video (has been|is) removed|<title>\s*news|latest news|blog post|article/i;
+const PLAYER_RE = /(player|video|iframe|embed|jwplayer|videojs|\.mp4|\.m3u8|stream|play)/i;
 
 function tmdb(path, params = {}) {
   return axios.get(`${TMDB}${path}`, {
@@ -47,6 +50,40 @@ function mapMovie(m) {
   };
 }
 
+// ── JUNK-FILTERING PROBE (parallel, fast) ──────────────
+async function probeSource(s) {
+  const t0 = Date.now();
+  try {
+    const r = await axios.get(s.url, {
+      timeout: 2200,
+      maxRedirects: 3,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122 Safari/537.36',
+        'Referer': 'https://www.google.com/'
+      },
+      validateStatus: () => true
+    });
+    const body = String(r.data || '');
+    const latency = Date.now() - t0;
+    if (r.status >= 400 || body.length < 200) return null;
+    if (JUNK_RE.test(body)) return null;
+    if (!PLAYER_RE.test(body)) return null;
+    return { ...s, latency, health: latency < 1200 ? 'ok' : 'slow' };
+  } catch { return null; }
+}
+
+async function buildSources(rawList) {
+  const valid = (Array.isArray(rawList) ? rawList : []).filter(s => s && s.url);
+  const results = await Promise.allSettled(valid.map(probeSource));
+  const verified = results.map(r => r.status === 'fulfilled' ? r.value : null).filter(Boolean);
+  verified.sort((a, b) => (a.latency || 0) - (b.latency || 0));
+  const verifiedUrls = new Set(verified.map(v => v.url));
+  const unverified = valid.filter(v => !verifiedUrls.has(v.url))
+    .map(v => ({ ...v, latency: 9999, health: 'unknown' }));
+  return [...verified, ...unverified].slice(0, 10);
+}
+
+// ── API METHODS ────────────────────────────────────────
 async function getTrending(page = 1) {
   const d = await tmdb('/trending/movie/week', { page });
   return (d.results || []).map(mapMovie);
@@ -81,22 +118,21 @@ async function getDetails(id) {
 }
 
 async function getStreamSources(id) {
-  const out = [];
+  const raw = [];
   for (const p of PROVIDERS) {
     try {
       if (typeof p.movie !== 'function') continue;
       const url = p.movie(id);
-      if (!url) continue;
-      out.push({ name: p.name, quality: p.quality || 'HD', url, health: 'ok', latency: 0 });
-    } catch (e) { /* skip broken provider */ }
+      if (url) raw.push({ name: p.name, quality: p.quality || 'HD', url });
+    } catch (e) {}
   }
-  // HARD FALLBACK — never return []
+  let out = await buildSources(raw);
   if (!out.length) {
-    out.push(
-      { name: 'VidSrc', quality: '1080p', url: `https://vidsrc.to/embed/movie/${id}`, health: 'ok', latency: 0 },
+    out = [
       { name: 'VidSrc.xyz', quality: '1080p', url: `https://vidsrc.xyz/embed/movie/${id}`, health: 'ok', latency: 0 },
+      { name: 'VidSrc', quality: '1080p', url: `https://vidsrc.to/embed/movie/${id}`, health: 'ok', latency: 0 },
       { name: 'Embed.su', quality: '1080p', url: `https://embed.su/embed/${id}`, health: 'ok', latency: 0 }
-    );
+    ];
   }
   return out;
 }
@@ -114,3 +150,4 @@ async function getSimilar(id) {
 }
 
 module.exports = { getTrending, search, getByGenre, getDetails, getStreamSources, getTrailer, getSimilar, PROVIDERS };
+
