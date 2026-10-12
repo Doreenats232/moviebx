@@ -5,15 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MovieBox</title>
 <style>
-:root{--bg:#0b0d12;--bg2:#12151d;--bg3:#1a1e28;--text:#f1f3f8;--muted:#8d94a3;--accent:#e50914;--accent2:#ff2f3c;--gold:#ffb300;--border:#262b37}
+:root{--bg:#0b0d12;--bg2:#12151d;--bg3:#1a1e28;--text:#f1f3f8;--muted:#8d94a3;--accent:#e50914;--accent2:#ff2f3c;--gold:#ffb300;--border:#262b37;--green:#22c55e}
 [data-theme="light"]{--bg:#f4f5f8;--bg2:#fff;--bg3:#e9ebf0;--text:#12151d;--muted:#5c6474;--border:#d8dce4}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow-x:hidden}
 button{cursor:pointer;font-family:inherit}
-img{display:block}
 input,select{font-family:inherit}
-header{position:sticky;top:0;z-index:100;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:13px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+header{position:sticky;top:0;z-index:100;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:13px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .logo{font-size:21px;font-weight:800;cursor:pointer;display:flex;gap:8px;align-items:center;white-space:nowrap}
 .logo .film{color:var(--accent)}
 nav{display:flex;gap:4px;flex:1;overflow-x:auto;scrollbar-width:none}
@@ -23,10 +21,12 @@ nav::-webkit-scrollbar{display:none}
 .nav-btn.active{background:var(--accent);color:#fff}
 .nav-btn.adult{color:var(--gold)}
 .nav-btn.adult.active{background:var(--gold);color:#111}
-.search-\boxed{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);padding:8px 14px;border-radius:22px;min-width:200px;max-width:300px;flex:0 1 300px}
-.search-box input{background:transparent;border:0;outline:none;color:var(--text);font-size:14px;flex:1;min-width:70px}
+.search-\boxed{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);padding:8px 14px;border-radius:22px;min-width:180px;max-width:280px;flex:0 1 280px}
+.search-box input{background:transparent;border:0;outline:none;color:var(--text);font-size:14px;flex:1;min-width:60px}
 .icon-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:50%;font-size:16px}
 .icon-btn:hover{background:var(--bg3)}
+.rd-badge{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);color:var(--green);padding:7px 13px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.rd-badge.off{background:rgba(255,179,0,.12);border-color:rgba(255,179,0,.35);color:var(--gold)}
 main{padding:22px;max-width:1440px;margin:0 auto}
 .section-title{font-size:19px;font-weight:700;margin:26px 0 15px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .section-title .dot{width:6px;height:21px;background:var(--accent);border-radius:3px}
@@ -46,6 +46,8 @@ main{padding:22px;max-width:1440px;margin:0 auto}
 .btn{padding:11px 22px;border-radius:24px;font-size:14px;font-weight:700;border:0;display:inline-flex;gap:8px;align-items:center}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-primary:hover{background:var(--accent2)}
+.btn-gold{background:var(--gold);color:#111}
+.btn-gold:hover{filter:brightness(1.08)}
 .btn-ghost{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.28)}
 .btn-ghost:hover{background:rgba(255,255,255,.24)}
 .row{display:flex;gap:14px;overflow-x:auto;padding:6px 2px 16px;scrollbar-width:thin}
@@ -57,7 +59,7 @@ main{padding:22px;max-width:1440px;margin:0 auto}
 .card{background:var(--bg2);border-radius:10px;overflow:hidden;cursor:pointer;transition:.18s;border:1px solid var(--border);position:relative}
 .card:hover{transform:translateY(-4px);border-color:var(--accent)}
 .poster-wrap{position:relative}
-.card .poster{width:100%;aspect-ratio:2/3;object-fit:cover;background:var(--bg3)}
+.card .poster{width:100%;aspect-ratio:2/3;object-fit:cover;background:var(--bg3);display:block}
 .card.adult .poster{aspect-ratio:16/10}
 .play-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:.18s}
 .play-overlay span{width:54px;height:54px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:21px;color:#fff}
@@ -105,11 +107,28 @@ main{padding:22px;max-width:1440px;margin:0 auto}
 .next-overlay{position:absolute;inset:0;background:rgba(11,13,18,.93);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:6;text-align:center;padding:20px}
 .next-overlay.show{display:flex}
 .src-status{position:absolute;left:12px;top:12px;z-index:7;background:rgba(0,0,0,.72);color:#fff;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:600}
+.src-tabs{display:flex;gap:6px;margin:16px 0 4px;border-bottom:1px solid var(--border);padding-bottom:0}
+.src-tab{background:transparent;border:0;color:var(--muted);padding:10px 16px;font-size:13px;font-weight:700;border-bottom:2px solid transparent;margin-bottom:-1px}
+.src-tab.active{color:var(--text);border-bottom-color:var(--accent)}
+.src-tab .tag{background:var(--gold);color:#111;padding:2px 8px;border-radius:8px;font-size:10px;margin-left:6px;font-weight:800}
 .sources{display:flex;gap:8px;overflow-x:auto;padding:12px 0;flex-wrap:wrap}
 .src-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600}
 .src-btn:hover,.src-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .src-btn.auto{background:var(--gold);color:#111;border-color:var(--gold)}
 .src-btn.auto.off{background:var(--bg3);color:var(--text);border-color:var(--border)}
+.torrent-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.torrent-row{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:12px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.torrent-row:hover{border-color:var(--gold)}
+.torrent-q{background:var(--gold);color:#111;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:800;flex-shrink:0}
+.torrent-q.q1080{background:var(--accent);color:#fff}
+.torrent-q.qcam{background:var(--muted);color:#fff}
+.torrent-name{flex:1;min-width:180px;font-size:12.5px;font-weight:600;line-height:1.4;word-break:break-word}
+.torrent-meta{color:var(--muted);font-size:11px;display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0}
+.torrent-meta .seed{color:var(--green);font-weight:700}
+.torrent-actions{display:flex;gap:6px;flex-shrink:0}
+.mini-btn{background:var(--accent);color:#fff;border:0;padding:7px 12px;border-radius:7px;font-size:11.5px;font-weight:700}
+.mini-btn.ghost{background:var(--bg2);color:var(--text);border:1px solid var(--border)}
+.mini-btn:disabled{opacity:.5;cursor:not-allowed}
 .synopsis{color:var(--muted);font-size:14px;line-height:1.65;margin:12px 0}
 .genres{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
 .genre-tag{background:var(--bg3);color:var(--text);padding:5px 12px;border-radius:14px;font-size:12px;border:1px solid var(--border)}
@@ -159,6 +178,8 @@ footer{padding:34px 24px;margin-top:46px;border-top:1px solid var(--border);colo
     <span>🔍</span>
     <input id="searchInput" type="text" placeholder="Search..." onkeydown="if(event.key==='Enter') doSearch()">
   </div>
+  <div class="rd-badge off" id="rdBadge">⚡ 4K</div>
+  <button class="icon-btn" onclick="clearCache()" title="Clear cache">🧹</button>
   <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
 </header>
 
@@ -184,9 +205,18 @@ footer{padding:34px 24px;margin-top:46px;border-top:1px solid var(--border);colo
         </div>
       </div>
       <div class="action-row" id="actionRow"></div>
-      <div class="sources" id="sourcesRow"></div>
-      <div class="filters" id="epSelector"></div>
-      <div class="ep-grid" id="epList"></div>
+      <div class="src-tabs">
+        <button class="src-tab active" id="tabStreams" onclick="switchSrcTab('streams')">🎬 Streams</button>
+        <button class="src-tab" id="tab4k" onclick="switchSrcTab('4k')">🎞️ 4K Torrents <span class="tag">NEW</span></button>
+      </div>
+      <div id="streamPane">
+        <div class="sources" id="sourcesRow"></div>
+        <div class="filters" id="epSelector"></div>
+        <div class="ep-grid" id="epList"></div>
+      </div>
+      <div id="torrentPane" style="display:none">
+        <div class="torrent-list" id="torrentList"></div>
+      </div>
       <div class="genres" id="modalGenres"></div>
       <p class="synopsis" id="modalSynopsis"></p>
     </div>
@@ -207,13 +237,14 @@ footer{padding:34px 24px;margin-top:46px;border-top:1px solid var(--border);colo
   <h2>Are you 18 or older?</h2>
   <p>This section contains adult content. By entering you confirm you are of legal age to view explicit material in your jurisdiction.</p>
   <div class="actions">
-    <button class="btn" style="background:var(--gold);color:#111" onclick="enterAdult()">Yes, I'm 18+</button>
+    <button class="btn btn-gold" onclick="enterAdult()">Yes, I'm 18+</button>
     <button class="btn" style="background:var(--bg3);color:var(--text)" onclick="leaveAdult()">No, take me back</button>
   </div>
 </div>
 
 <script>
 const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 const LS = {
   get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
   set(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
@@ -223,36 +254,43 @@ let pageNo = 1, allItems = [], loading = false, exhausted = false, sortMode = 'p
 let myMovies = LS.get('mbx_list', []), myContinue = LS.get('mbx_continue', []);
 let adultUnlocked = LS.get('mbx_age_ok', 0) === 1;
 let nextInfo = null, nextTimer = null, currentEp = null, currentItem = null;
+let currentSources = [], srcIdx = 0, srcTimer = null, currentIsTV = false;
+let autoFallback = LS.get('mbx_autofb', true);
+let srcHealth = LS.get('mbx_src_health', {});
+let srcTab = 'streams';
+let debridStatus = { enabled: false };
 
-// ═══ Theme ═══════════════════════════════════════════════
+// Theme
 document.documentElement.dataset.theme = LS.get('mbx_theme', 'dark');
 updateThemeBtn();
 function toggleTheme() {
   const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-  document.documentElement.dataset.theme = t;
-  LS.set('mbx_theme', t);
-  updateThemeBtn();
+  document.documentElement.dataset.theme = t; LS.set('mbx_theme', t); updateThemeBtn();
 }
 function updateThemeBtn() { $('#themeBtn').textContent = document.documentElement.dataset.theme === 'dark' ? '🌙' : '☀️'; }
 
-// ═══ Fetch ═══════════════════════════════════════════════
-async function api(url) {
-  const r = await fetch(url);
+async function clearCache() {
+  try { await api('/api/cache/clear', { method: 'POST' }); showToast('Cache cleared'); } catch { showToast('Cache clear failed'); }
+}
+
+// Fetch
+async function api(url, opts = {}) {
+  const r = await fetch(url, opts);
   const ct = r.headers.get('content-type') || '';
-  if (!ct.includes('application/json')) throw new Error(`${url} → non-JSON response (status ${r.status})`);
+  if (!ct.includes('application/json')) throw new Error(`${url} → non-JSON (status ${r.status})`);
   const d = await r.json();
-  if (!r.ok) throw new Error(d.error || `HTTP ${r.status} on ${url}`);
+  if (!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
   return d;
 }
-const list = (d) => Array.isArray(d?.results) ? d.results : [];
+const list = d => Array.isArray(d?.results) ? d.results : [];
 
-// ═══ Cards / rows ════════════════════════════════════════
+// Cards
 function cardHTML(it, opts = {}) {
   const poster = it.poster || it.thumbnail || it.image || 'https://placehold.co/300x450/12151d/8d94a3?text=No+Poster';
   const title = String(it.title || it.name || 'Untitled').replace(/"/g, '&quot;');
   const inList = myMovies.some(m => String(m.id) === String(it.id));
   const cont = myContinue.find(c => String(c.id) === String(it.id) && c.progress > 1 && c.progress < 98);
-  const data = { id: it.id, title: it.title || it.name, poster, adult: opts.adult ? 1 : 0, source: it.source || '', tv: opts.tv ? 1 : 0 };
+  const data = { id: it.id, title: it.title || it.name, poster, adult: opts.adult ? 1 : 0, source: it.source || '', tv: opts.tv ? 1 : 0, year: it.year || '' };
   const j = JSON.stringify(data).replace(/'/g, '&#39;');
   return `
   <div class="card ${opts.adult ? 'adult' : ''}" onclick='openDetail(${j})'>
@@ -290,7 +328,7 @@ const errorHTML = (msg, retry = 'render()') => `
   <div class="status error"><strong>⚠️ Failed to load</strong><br><br>${msg}
   <div class="retry"><button class="btn btn-primary" onclick="${retry}">↻ Retry</button></div></div>`;
 
-// ═══ Hero ════════════════════════════════════════════════
+// Hero
 function heroHTML(items) {
   const top = items.filter(i => i.backdrop).slice(0, 5);
   if (!top.length) return '';
@@ -302,11 +340,13 @@ function heroHTML(items) {
             ${it.rating ? `<span style="color:var(--gold);font-weight:700">★ ${it.rating}</span>` : ''}
             ${it.year ? `<span>📅 ${it.year}</span>` : ''}
             <span style="background:var(--accent);padding:2px 9px;border-radius:9px;font-size:11px;font-weight:700">HD</span>
+            <span style="background:var(--gold);color:#111;padding:2px 9px;border-radius:9px;font-size:11px;font-weight:800">4K</span>
           </div>
           <h1>${it.title}</h1>
           <p>${it.overview || ''}</p>
           <div class="hero-actions">
-            <button class="btn btn-primary" onclick='openDetail(${JSON.stringify({ id: it.id, title: it.title, poster: it.poster }).replace(/'/g, "&#39;")})'>▶ Watch Now</button>
+            <button class="btn btn-primary" onclick='openDetail(${JSON.stringify({ id: it.id, title: it.title, poster: it.poster, year: it.year }).replace(/'/g, "&#39;")})'>▶ Watch Now</button>
+            <button class="btn btn-gold" onclick='openDetail(${JSON.stringify({ id: it.id, title: it.title, poster: it.poster, year: it.year }).replace(/'/g, "&#39;")}); setTimeout(() => switchSrcTab("4k"), 400)'>⚡ 4K</button>
             <button class="btn btn-ghost" onclick="openTrailer('${it.id}')">▶ Trailer</button>
             <button class="btn btn-ghost" onclick='toggleFav(${JSON.stringify({ id: it.id, title: it.title, poster: it.poster }).replace(/'/g, "&#39;")})'>＋ My List</button>
           </div>
@@ -318,22 +358,22 @@ function heroHTML(items) {
 let heroIdx = 0, heroTimer = null, heroCount = 0;
 function heroStart() {
   clearInterval(heroTimer);
-  heroCount = document.querySelectorAll('.hero-slide').length;
+  heroCount = $$('.hero-slide').length;
   if (heroCount < 2) return;
   heroTimer = setInterval(() => heroGo((heroIdx + 1) % heroCount), 6500);
 }
 function heroGo(i) {
   heroIdx = i;
-  document.querySelectorAll('.hero-slide').forEach((s, k) => s.classList.toggle('active', k === i));
-  document.querySelectorAll('.hero-dots span').forEach((d, k) => d.classList.toggle('on', k === i));
+  $$('.hero-slide').forEach((s, k) => s.classList.toggle('active', k === i));
+  $$('.hero-dots span').forEach((d, k) => d.classList.toggle('on', k === i));
 }
 
-// ═══ Tabs / render ═══════════════════════════════════════
+// Tabs
 function switchTab(t) {
   if (t === 'adult' && !adultUnlocked) { $('#ageGate').classList.add('open'); return; }
   tab = t; genre = null; adultCat = 'trending'; query = '';
   $('#searchInput').value = '';
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+  $$('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
   render();
 }
 function goHome() { switchTab('home'); }
@@ -380,8 +420,7 @@ const MOVIE_GENRES = [['all','All'],['action','Action'],['comedy','Comedy'],['ho
 
 async function renderMovies(el) {
   el.innerHTML = `<div class="pills">${MOVIE_GENRES.map(([k, l]) =>
-    `<button class="pill ${genre === k ? 'active' : ''}" onclick="selectGenre('${k}')">${l}</button>`).join('')}</div>` +
-    filterBarHTML() + `<div class="grid" id="mainGrid"></div>`;
+    `<button class="pill ${genre === k ? 'active' : ''}" onclick="selectGenre('${k}')">${l}</button>`).join('')}</div>` + filterBarHTML() + `<div class="grid" id="mainGrid"></div>`;
   await loadPage();
   setupInfinite();
 }
@@ -415,8 +454,7 @@ async function loadPage() {
   if (grid) grid.insertAdjacentHTML('beforeend', `<div id="loadingMore" style="grid-column:1/-1">${skeletonHTML(6)}</div>`);
   try {
     let url;
-    if (query) url = tab === 'adult'
-      ? `/api/adult/search?q=${encodeURIComponent(query)}&source=${adultSource}&page=${pageNo}`
+    if (query) url = tab === 'adult' ? `/api/adult/search?q=${encodeURIComponent(query)}&source=${adultSource}&page=${pageNo}`
       : tab === 'tv' ? `/api/tv/search?q=${encodeURIComponent(query)}&page=${pageNo}`
       : `/api/movies/search?q=${encodeURIComponent(query)}&page=${pageNo}`;
     else if (tab === 'adult') url = (adultCat && adultCat !== 'trending')
@@ -432,8 +470,7 @@ async function loadPage() {
     if (grid) {
       $('#loadingMore')?.remove();
       grid.insertAdjacentHTML('beforeend', items.map(it => cardHTML(it, { adult: tab === 'adult', tv: tab === 'tv' })).join(''));
-      const fc = $('#filterCount');
-      if (fc) fc.textContent = `${allItems.length} titles loaded`;
+      const fc = $('#filterCount'); if (fc) fc.textContent = `${allItems.length} titles loaded`;
     }
     pageNo++;
   } catch (e) {
@@ -454,8 +491,7 @@ function setupInfinite() {
 
 async function renderTV(el) {
   el.innerHTML = filterBarHTML() + `<div class="grid" id="mainGrid"></div>`;
-  await loadPage();
-  setupInfinite();
+  await loadPage(); setupInfinite();
 }
 
 const ADULT_CATS = [['trending','🔥 Trending'],['popular','⭐ Popular'],['new','🆕 New'],['amateur','Amateur'],['anal','Anal'],['asian','Asian'],['bbw','BBW'],['big-tits','Big Tits'],['blonde','Blonde'],['blowjob','Blowjob'],['brunette','Brunette'],['ebony','Ebony'],['latina','Latina'],['lesbian','Lesbian'],['mature','Mature'],['milf','MILF'],['teen','Teen'],['threesome','Threesome'],['toys','Toys']];
@@ -463,18 +499,14 @@ const ADULT_SOURCES = [['all','All Sources'],['xvideos','XVideos'],['xnxx','XNXX
 
 async function renderAdult(el) {
   el.innerHTML = `
-    <div class="pills">${ADULT_SOURCES.map(([k, l]) =>
-      `<button class="pill adult ${adultSource === k ? 'active' : ''}" onclick="setAdultSource('${k}')">${l}</button>`).join('')}</div>
-    <div class="pills">${ADULT_CATS.map(([k, l]) =>
-      `<button class="pill adult ${adultCat === k ? 'active' : ''}" onclick="selectAdultCat('${k}')">${l}</button>`).join('')}</div>
+    <div class="pills">${ADULT_SOURCES.map(([k, l]) => `<button class="pill adult ${adultSource === k ? 'active' : ''}" onclick="setAdultSource('${k}')">${l}</button>`).join('')}</div>
+    <div class="pills">${ADULT_CATS.map(([k, l]) => `<button class="pill adult ${adultCat === k ? 'active' : ''}" onclick="selectAdultCat('${k}')">${l}</button>`).join('')}</div>
     <div class="filters">
-      <input id="perfInput" placeholder="Search performer / pornstar..." style="min-width:230px"
-             onkeydown="if(event.key==='Enter') searchPerformer()">
+      <input id="perfInput" placeholder="Search performer / pornstar..." style="min-width:230px" onkeydown="if(event.key==='Enter') searchPerformer()">
       <button class="btn btn-primary" onclick="searchPerformer()">Find performer</button>
     </div>
     <div class="grid" id="mainGrid"></div>`;
-  await loadPage();
-  setupInfinite();
+  await loadPage(); setupInfinite();
 }
 function setAdultSource(s) { adultSource = s; render(); }
 function selectAdultCat(c) { adultCat = (adultCat === c) ? 'trending' : c; render(); }
@@ -509,13 +541,6 @@ function toggleFav(item) {
   if ($('#modalBackdrop').classList.contains('open') && currentItem) {
     $('#actionRow').innerHTML = actionButtonsHTML(currentItem, currentItem.tv ? null : currentItem.id);
   }
-  const el = $('#content');
-  if (tab === 'home' || tab === 'movies' || tab === 'tv' || tab === 'adult') {
-    document.querySelectorAll('.card').forEach(c => {
-      const b = c.querySelector('.fav-btn');
-      if (!b) return;
-    });
-  }
 }
 function showToast(msg) {
   const t = document.createElement('div');
@@ -543,9 +568,9 @@ async function doSearch() {
   } catch (e) { el.innerHTML = errorHTML(e.message, 'doSearch()'); }
 }
 
-// ═════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // DETAIL MODAL
-// ═════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function openDetail(item) {
   currentItem = item;
   $('#modalBackdrop').classList.add('open');
@@ -553,17 +578,21 @@ async function openDetail(item) {
   $('#modalHero').style.backgroundImage = `url('${item.poster || ''}')`;
   $('#modalSub').innerHTML = 'Loading…';
   $('#playerWrap').innerHTML = $('#nextOverlay').outerHTML;
-  ['sourcesRow','actionRow','epSelector','epList','modalGenres'].forEach(id => $('#' + id).innerHTML = '');
+  ['sourcesRow','actionRow','epSelector','epList','modalGenres','torrentList'].forEach(id => $('#' + id).innerHTML = '');
   $('#modalSynopsis').textContent = '';
+  switchSrcTab('streams');
   try {
     if (item.adult) {
+      $('#tab4k').style.display = 'none';
       const d = await api(`/api/adult/video/${encodeURIComponent(item.source || 'xvideos')}/${encodeURIComponent(item.id)}`);
       renderAdultDetail(d, item);
-    } else if (item.tv) {
-      renderTVDetail(await api(`/api/tv/${encodeURIComponent(item.id)}`), item);
     } else {
-      try { renderMovieDetail(await api(`/api/movie/${encodeURIComponent(item.id)}`), item); }
-      catch { renderTVDetail(await api(`/api/tv/${encodeURIComponent(item.id)}`), item); }
+      $('#tab4k').style.display = '';
+      if (item.tv) renderTVDetail(await api(`/api/tv/${encodeURIComponent(item.id)}`), item);
+      else {
+        try { renderMovieDetail(await api(`/api/movie/${encodeURIComponent(item.id)}`), item); }
+        catch { renderTVDetail(await api(`/api/tv/${encodeURIComponent(item.id)}`), item); }
+      }
     }
   } catch (e) {
     $('#modalSub').innerHTML = `<span style="color:var(--accent2)">${e.message}</span>
@@ -575,7 +604,8 @@ function actionButtonsHTML(item, trailerId) {
   return `
     <button class="btn btn-ghost" style="color:var(--text);border-color:var(--border)" onclick='toggleFav(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
       ${myMovies.some(m => String(m.id) === String(item.id)) ? '★ In My List' : '☆ Add to My List'}</button>
-    ${trailerId ? `<button class="btn btn-ghost" style="color:var(--text);border-color:var(--border)" onclick="openTrailer('${trailerId}')">▶ Trailer</button>` : ''}`;
+    ${trailerId ? `<button class="btn btn-ghost" style="color:var(--text);border-color:var(--border)" onclick="openTrailer('${trailerId}')">▶ Trailer</button>` : ''}
+    <button class="btn btn-gold" onclick="switchSrcTab('4k')">⚡ 4K Torrents</button>`;
 }
 
 function renderMovieDetail(d, item) {
@@ -589,6 +619,7 @@ function renderMovieDetail(d, item) {
   api(`/api/movie/${encodeURIComponent(item.id)}/sources`)
     .then(s => renderSources(s.sources || s.results || s, d.title, false))
     .catch(e => $('#sourcesRow').innerHTML = errorHTML(e.message, 'closeModal()'));
+  loadTorrents('movie', item.id, d.title, d.year);
 }
 
 async function renderTVDetail(d, item) {
@@ -606,6 +637,7 @@ async function renderTVDetail(d, item) {
     </select>
     <span style="color:var(--muted);font-size:12px">Pick an episode below</span>`;
   await loadSeason(item.id);
+  loadTorrents('tv', item.id, d.title, d.year);
 }
 
 async function loadSeason(id) {
@@ -627,7 +659,7 @@ async function loadSeason(id) {
 
 async function playEpisode(id, season, episode, cardEl) {
   cancelNext();
-  document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
+  $$('.ep-card').forEach(c => c.classList.remove('active'));
   cardEl && cardEl.classList.add('active');
   currentEp = { id, season, episode };
   $('#playerWrap').innerHTML = `<div class="src-status">⏳ Loading stream…</div>` + $('#nextOverlay').outerHTML;
@@ -650,13 +682,94 @@ function renderAdultDetail(d, item) {
   renderSources(d.sources || (d.url ? [{ name: 'Primary', url: d.url }] : []), d.title, false);
 }
 
-// ═════════════════════════════════════════════════════════
-// SOURCE PLAYER + AUTO-FALLBACK  (feature #11)
-// ═════════════════════════════════════════════════════════
-let currentSources = [], srcIdx = 0, srcTimer = null, currentIsTV = false;
-let autoFallback = LS.get('mbx_autofb', true);
-let srcHealth = LS.get('mbx_src_health', {});
+// ═══════════════════════════════════════════
+// SOURCE TABS
+// ═══════════════════════════════════════════
+function switchSrcTab(t) {
+  srcTab = t;
+  $('#tabStreams').classList.toggle('active', t === 'streams');
+  $('#tab4k').classList.toggle('active', t === '4k');
+  $('#streamPane').style.display = t === 'streams' ? '' : 'none';
+  $('#torrentPane').style.display = t === '4k' ? '' : 'none';
+}
 
+// ═══════════════════════════════════════════
+// 4K TORRENTS
+// ═══════════════════════════════════════════
+async function loadTorrents(kind, id, title, year) {
+  const el = $('#torrentList');
+  el.innerHTML = `<div class="status" style="padding:22px">⏳ Searching 4K torrents…</div>`;
+  try {
+    const q = `${title} ${year || ''}`.trim();
+    const url = kind === 'tv'
+      ? `/api/tv/${encodeURIComponent(id)}/${currentEp?.season || 1}/${currentEp?.episode || 1}/4k?q=${encodeURIComponent(q)}`
+      : `/api/movie/${encodeURIComponent(id)}/4k?q=${encodeURIComponent(q)}`;
+    const d = await api(url);
+    const items = list(d);
+    if (!items.length) {
+      el.innerHTML = `<div class="status" style="padding:22px">🤷 No torrents found for "${q}"</div>`;
+      return;
+    }
+    const sorted = [...items].sort((a, b) => {
+      const r = { '4K': 0, '1080p': 1, '720p': 2, 'HD': 3, 'CAM': 4 };
+      return (r[a.quality] ?? 9) - (r[b.quality] ?? 9) || (b.seeds || 0) - (a.seeds || 0);
+    });
+    debridStatus.enabled = d.debrid !== false;
+    el.innerHTML = sorted.map((t, i) => {
+      const qCls = t.quality === '4K' ? '' : (t.quality === '1080p' ? 'q1080' : (t.quality === 'CAM' ? 'qcam' : 'q1080'));
+      const j = JSON.stringify(t).replace(/'/g, '&#39;');
+      return `
+      <div class="torrent-row">
+        <div class="torrent-q ${qCls}">${t.quality || '?'}</div>
+        <div class="torrent-name" title="${String(t.title).replace(/"/g, '&quot;')}">${t.title}</div>
+        <div class="torrent-meta">
+          <span class="seed">▲ ${t.seeds || 0}</span>
+          <span>▼ ${t.peers || 0}</span>
+          <span>💾 ${t.size || '?'}</span>
+          <span>${t.source}</span>
+        </div>
+        <div class="torrent-actions">
+          ${debridStatus.enabled
+            ? `<button class="mini-btn" onclick='resolveAndPlay(${j})'>▶ Play</button>`
+            : ''}
+          <button class="mini-btn ghost" onclick='copyMagnet(${j})'>Copy</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    el.innerHTML = errorHTML(e.message, `loadTorrents('${kind}','${id}')`);
+  }
+}
+
+async function resolveAndPlay(t) {
+  const wrap = $('#playerWrap');
+  switchSrcTab('streams');
+  wrap.innerHTML = `<div class="src-status">⚡ Resolving 4K via Real-Debrid… (${t.source} · ${t.seeds || 0} seeds)</div>` + $('#nextOverlay').outerHTML;
+  try {
+    const d = await api('/api/torrent/resolve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ magnet: t.magnet, detailUrl: t.detailUrl, source: t.source, title: t.title })
+    });
+    const streams = d.streams || [];
+    if (!streams.length) throw new Error('Real-Debrid returned no playable streams');
+    renderSources(streams, t.title, false);
+    showToast(`⚡ 4K resolved — ${streams.length} file${streams.length > 1 ? 's' : ''} ready`);
+  } catch (e) {
+    wrap.innerHTML = errorHTML(e.message, `resolveAndPlay(${JSON.stringify(t).replace(/'/g, '&#39;')})`) +
+      `<div class="status" style="padding:14px"><button class="btn btn-gold" onclick='copyMagnet(${JSON.stringify(t).replace(/'/g, "&#39;")})'>📋 Copy Magnet instead</button></div>`;
+  }
+}
+
+function copyMagnet(t) {
+  const m = t.magnet || t.detailUrl;
+  if (!m) return showToast('No magnet available');
+  navigator.clipboard.writeText(m).then(() => showToast('📋 Magnet copied')).catch(() => showToast('Copy failed'));
+}
+
+// ═══════════════════════════════════════════
+// PLAYER + AUTO-FALLBACK
+// ═══════════════════════════════════════════
 function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return String(u).slice(0, 24); } }
 function hostScore(u) { const h = srcHealth[hostOf(u)]; return h ? (h.ok * 2 - h.fail) : 0; }
 function markSource(u, ok) {
@@ -672,7 +785,7 @@ function renderSources(sources, title, isTV = false) {
   currentIsTV = !!isTV;
   const row = $('#sourcesRow');
   if (!Array.isArray(sources) || !sources.length) {
-    row.innerHTML = `<div class="status" style="padding:8px">No stream sources available.</div>`;
+    row.innerHTML = `<div class="status" style="padding:8px">No sources available.</div>`;
     return;
   }
   currentSources = [...sources].sort((a, b) => hostScore(b.url) - hostScore(a.url));
@@ -700,13 +813,13 @@ function playSource(i) {
   if (!s) return;
   srcIdx = i;
   clearTimeout(srcTimer);
-  document.querySelectorAll('.src-btn[id^=src]').forEach(b => b.classList.remove('active'));
+  $$('.src-btn[id^=src]').forEach(b => b.classList.remove('active'));
   const btn = $('#src' + i);
   btn && btn.classList.add('active');
 
   const wrap = $('#playerWrap');
   wrap.innerHTML = '';
-  const isDirect = /\.(mp4|m3u8|webm)(\?|$)/i.test(s.url);
+  const isDirect = /\.(mp4|m3u8|webm|mkv)(\?|$)/i.test(s.url);
 
   if (isDirect) {
     const v = document.createElement('video');
@@ -717,20 +830,15 @@ function playSource(i) {
     v.ontimeupdate = () => { if (currentItem && v.duration) saveProgress((v.currentTime / v.duration) * 100); };
     v.onended = () => { if (currentIsTV && nextInfo) startNextCountdown(); };
     wrap.appendChild(v);
-    wrap.insertAdjacentHTML('beforeend', `<button class="pip-btn" onclick="goPiP()">⧉ Picture-in-Picture</button>`);
+    wrap.insertAdjacentHTML('beforeend', `<button class="pip-btn" onclick="goPiP()">⧉ PiP</button>`);
+    srcTimer = setTimeout(() => { const m = $('#srcStatus'); if (m) failSource(s); }, 10000);
   } else {
     const f = document.createElement('iframe');
     f.allowFullscreen = true;
     f.allow = 'autoplay; encrypted-media; picture-in-picture';
     f.style.cssText = 'width:100%;height:100%;border:0';
     let fired = false;
-    f.onload = () => {
-      if (fired) return;
-      fired = true;
-      clearTimeout(srcTimer);
-      markSource(s.url, true);
-      const m = $('#srcStatus'); if (m) m.remove();
-    };
+    f.onload = () => { if (fired) return; fired = true; clearTimeout(srcTimer); markSource(s.url, true); const m = $('#srcStatus'); if (m) m.remove(); };
     f.onerror = () => failSource(s);
     f.src = s.url;
     wrap.appendChild(f);
@@ -748,7 +856,6 @@ function playSource(i) {
         <button class="btn btn-ghost" onclick="cancelNext()">Cancel</button>
       </div>
     </div>`);
-  if (isDirect) srcTimer = setTimeout(() => { const m = $('#srcStatus'); if (m) failSource(s); }, 10000);
 }
 
 function failSource(s) {
@@ -757,7 +864,7 @@ function failSource(s) {
   const last = srcIdx + 1 >= currentSources.length;
   if (autoFallback && !last) {
     const next = currentSources[srcIdx + 1];
-    showToast(`⚠️ ${s.name || 'Source'} failed — switching to ${next.name || 'next source'}`);
+    showToast(`⚠️ ${s.name || 'Source'} failed — switching to ${next.name || 'next'}`);
     playSource(srcIdx + 1);
     return;
   }
@@ -779,7 +886,7 @@ function saveProgress(pct) {
 function goPiP() {
   const v = $('#playerWrap video');
   if (!v) return showToast('PiP works on direct video streams only');
-  (document.pictureInPictureElement ? document.exitPictureInPicture() : v.requestPictureInPicture()).catch(() => showToast('PiP blocked by browser'));
+  (document.pictureInPictureElement ? document.exitPictureInPicture() : v.requestPictureInPicture()).catch(() => showToast('PiP blocked'));
 }
 
 function startNextCountdown() {
@@ -814,8 +921,7 @@ async function openTrailer(id) {
 function closeTrailer() { $('#trailerModal').classList.remove('open'); $('#trailerWrap').innerHTML = ''; }
 function closeModal() {
   $('#modalBackdrop').classList.remove('open');
-  clearTimeout(srcTimer);
-  cancelNext();
+  clearTimeout(srcTimer); cancelNext();
   $('#playerWrap').innerHTML = '';
   currentItem = null;
 }
@@ -828,9 +934,27 @@ function enterAdult() {
 }
 function leaveAdult() { $('#ageGate').classList.remove('open'); goHome(); }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeTrailer(); }
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeTrailer(); } });
+
+// 4K Ready badge
+(async () => {
+  try {
+    const s = await api('/api/debrid/status');
+    const b = $('#rdBadge');
+    if (s.enabled) {
+      b.textContent = '⚡ 4K Ready';
+      b.classList.remove('off');
+    } else {
+      b.textContent = '⚡ 4K — set RD_API_KEY';
+      b.classList.add('off');
+    }
+    debridStatus = s;
+  } catch {
+    const b = $('#rdBadge');
+    b.textContent = '⚡ 4K';
+    b.classList.add('off');
+  }
+})();
 
 render();
 </script>
