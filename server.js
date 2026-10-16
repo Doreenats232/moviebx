@@ -11,6 +11,7 @@
      MovieBox fetched live with a 5-minute TTL, never merged or
      diluted with fallback rows. `source` field labels every response.
 
+   CONFIRMED LIVE DOMAIN: movieboxhd.net
    NO TMDB. NO API KEYS. NO ENV VARS.
    Repo = 3 files: server.js, package.json, Dockerfile.
    ========================================================== */
@@ -32,14 +33,15 @@ const http = axios.create({
 
 /* =============== MOVIEBOX PRIMARY LAYER =============== */
 const MB_BASES = [
+  'https://movieboxhd.net',        // confirmed live — always tried first
   'https://web.moviebox.ng',
   'https://moviebox.digital',
   'https://moviebox.bio',
   'https://moviebox.ng'
 ];
 let mbActive = null;
-const MB_TTL = 5 * 60 * 1000;              // freshness window
-const SNAP = '/tmp/mb_snapshot.json';      // consistency snapshot (not a repo file)
+const MB_TTL = 5 * 60 * 1000;
+const SNAP = '/tmp/mb_snapshot.json';
 
 function snapLoad() {
   try { return JSON.parse(fs.readFileSync(SNAP, 'utf8')) || {}; } catch (e) { return {}; }
@@ -98,7 +100,12 @@ async function mbTrending(type) {
   const tries = [
     ['/api/home', { type: type }],
     ['/api/' + (type === 'series' ? 'series' : 'movie') + '/trending', {}],
-    ['/api/discover', { type: type }]
+    ['/api/discover', { type: type }],
+    ['/api/v1/home', { type: type }],
+    ['/api/v1/' + (type === 'series' ? 'series' : 'movie') + '/trending', {}],
+    ['/api/v1/discover', { type: type }],
+    ['/home', { type: type }],
+    ['/trending', { type: type }]
   ];
   for (const t of tries) {
     try {
@@ -110,25 +117,62 @@ async function mbTrending(type) {
 }
 
 async function mbSearch(type, q) {
-  const raw = await mbFetch('/api/search', { q: q, type: type });
-  return mbList(raw).map(x => mbNorm(x, type)).filter(x => x.id && x.title);
+  const tries = [
+    ['/api/search', { q: q, type: type }],
+    ['/api/v1/search', { q: q, type: type }],
+    ['/search', { q: q, type: type }],
+    ['/api/v1/search/' + encodeURIComponent(q), { type: type }]
+  ];
+  for (const t of tries) {
+    try {
+      const raw = await mbFetch(t[0], t[1]);
+      const items = mbList(raw).map(x => mbNorm(x, type)).filter(x => x.id && x.title);
+      if (items.length) return items;
+    } catch (e) {}
+  }
+  return [];
 }
 
 async function mbDetail(type, id) {
-  const raw = await mbFetch('/api/detail', { imdb_id: id, type: type });
-  const list = mbList(raw);
-  return mbNorm(list[0] || raw.data || raw, type);
+  const tries = [
+    ['/api/detail', { imdb_id: id, type: type }],
+    ['/api/v1/detail', { imdb_id: id, type: type }],
+    ['/api/detail/' + id, { type: type }],
+    ['/api/v1/detail/' + id, { type: type }],
+    ['/detail/' + id, { type: type }],
+    ['/api/' + id, { type: type }]
+  ];
+  for (const t of tries) {
+    try {
+      const raw = await mbFetch(t[0], t[1]);
+      const list = mbList(raw);
+      const norm = mbNorm(list[0] || raw.data || raw, type);
+      if (norm && norm.title) return norm;
+    } catch (e) {}
+  }
+  return null;
 }
 
 async function mbSources(type, id, s, e) {
-  try {
-    const raw = await mbFetch('/api/play', { imdb_id: id, type: type, season: s, episode: e });
-    return mbList(raw).map(x => ({
-      name: x.name || x.quality || 'MovieBox',
-      quality: x.quality || x.label || 'auto',
-      url: x.url || x.play_url || x.link || ''
-    })).filter(x => x.url);
-  } catch (err) { return []; }
+  const tries = [
+    ['/api/play', { imdb_id: id, type: type, season: s, episode: e }],
+    ['/api/v1/play', { imdb_id: id, type: type, season: s, episode: e }],
+    ['/api/play/' + id, { type: type, season: s, episode: e }],
+    ['/api/v1/stream', { imdb_id: id, type: type, season: s, episode: e }],
+    ['/api/stream/' + id, { type: type, season: s, episode: e }]
+  ];
+  for (const t of tries) {
+    try {
+      const raw = await mbFetch(t[0], t[1]);
+      const out = mbList(raw).map(x => ({
+        name: x.name || x.quality || 'MovieBox',
+        quality: x.quality || x.label || 'auto',
+        url: x.url || x.play_url || x.link || x.stream_url || x.file || ''
+      })).filter(x => x.url);
+      if (out.length) return out;
+    } catch (e) {}
+  }
+  return [];
 }
 
 /* =============== FREE FALLBACK STACK (key-free) =============== */
@@ -194,13 +238,13 @@ function vidSources(type, id, s, e) {
 async function unifiedTrending(type) {
   try {
     const items = await mbTrending(type);
-    snapSave(type, items);                       // refresh snapshot while live
+    snapSave(type, items);
     return { results: items, source: 'moviebox' };
   } catch (e) {
-    const cached = snapItems(type);              // consistency: same MB catalog
+    const cached = snapItems(type);
     if (cached) return { results: cached, source: 'moviebox-cache' };
     try {
-      return { results: await cmCatalog(type, 0), source: 'fallback' };  // cold start only
+      return { results: await cmCatalog(type, 0), source: 'fallback' };
     } catch (e2) { return { results: [], source: 'none' }; }
   }
 }
@@ -252,7 +296,7 @@ async function unifiedDetail(type, id) {
 async function unifiedSources(type, id, s, e) {
   const out = [];
   try { (await mbSources(type, id, s, e)).forEach(x => out.push(x)); } catch (err) {}
-  vidSources(type, id, s, e).forEach(x => out.push(x));   // free stack always appended
+  vidSources(type, id, s, e).forEach(x => out.push(x));
   return { sources: out };
 }
 
@@ -308,6 +352,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     ok: true,
     moviebox_base: mbActive,
+    movieboxhd_primary: MB_BASES[0],
     snapshot: {
       movies: s.movies ? Math.round((Date.now() - s.movies.at) / 1000) + 's ago' : 'none',
       series: s.series ? Math.round((Date.now() - s.series.at) / 1000) + 's ago' : 'none'
@@ -390,6 +435,7 @@ app.post('/api/cache/clear', (req, res) => {
   mbActive = null;
   res.json({ ok: true, snapshot: 'cleared' });
 });
+
 /* =============== INLINE UI (one string, concat-only JS) =============== */
 const HTML = [
 '<!doctype html><html><head><meta charset="utf-8">',
@@ -460,7 +506,7 @@ const HTML = [
 '<div id="toast"></div>',
 '<script>',
 'window.open = function(){ return null; };',
-'var S = { tab: "home", heroIdx: 0, heroItems: [], srcList: [], srcIdx: 0, cur: null, list: [] , cw: [] };',
+'var S = { tab: "home", heroIdx: 0, heroItems: [], srcList: [], srcIdx: 0, cur: null, list: [], cw: [] };',
 'try { S.list = JSON.parse(localStorage.getItem("mb_list") || "[]"); S.cw = JSON.parse(localStorage.getItem("mb_cw") || "[]"); } catch(e) {}',
 'function $(s){ return document.querySelector(s); }',
 'function esc(s){ return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }',
@@ -528,7 +574,6 @@ const HTML = [
 '  var si = $("#search"); if (!si) return;',
 '  si.onkeydown = async function(e){ if (e.key !== "Enter") return; var r = await api(endpoint + "?q=" + encodeURIComponent(si.value)); $("#grid").innerHTML = (r.results || []).map(card).join(""); };',
 '}',
-'/* ---- download: instant, no confirm ---- */',
 'async function download(id){',
 '  var r = await api("/api/movie/" + id + "/4k"); var ts = r.torrents || [];',
 '  if (!ts.length) { toast("No torrents found"); return; }',
@@ -536,7 +581,6 @@ const HTML = [
 '  try { await navigator.clipboard.writeText(pick.magnet); } catch(e) {}',
 '  toast(pick.quality + " · " + pick.size + " · magnet copied");',
 '}',
-'/* ---- detail + autoplay engine ---- */',
 'async function openDetail(id, type, autoplay){',
 '  var p = (type === "series") ? "/api/tv/" : "/api/movie/";',
 '  var dPromise = api(p + id);',
@@ -580,7 +624,7 @@ const HTML = [
 '      playSources(ss.sources || [], m);',
 '    };',
 '  });',
-'  if (autoplay !== false) playSources(s.sources || [], m);   // ALWAYS autoplay, silent hunt',
+'  if (autoplay !== false) playSources(s.sources || [], m);',
 '}',
 'function playSources(list, meta){',
 '  S.srcList = list || []; S.srcIdx = 0;',
@@ -608,11 +652,10 @@ const HTML = [
 '    var sc = $("#psound");',
 '    if (sc) sc.onclick = function(){ try { fr.contentWindow.postMessage({ command: "unmute" }, "*"); } catch(e) {} sc.textContent = "🔊 " + s.name; };',
 '  };',
-'  setTimeout(function(){ if (!settled) { settled = true; trySrc(); } }, 6500);   // silent skip',
+'  setTimeout(function(){ if (!settled) { settled = true; trySrc(); } }, 6500);',
 '  $("#pframe").innerHTML = ""; $("#pframe").appendChild(fr);',
 '  $("#pmsg").textContent = "Source " + S.srcIdx + "/" + S.srcList.length + " · " + s.name;',
 '}',
-'/* ---- adult playback ---- */',
 'async function playAdult(id, source){',
 '  var r = await api("/api/adult/video/" + source + "?u=" + id);',
 '  var pl = $("#player");',
@@ -625,7 +668,6 @@ const HTML = [
 '    $("#pframe").innerHTML = "<iframe allow=\\"autoplay; fullscreen\\" referrerpolicy=\\"no-referrer\\" src=\\"" + esc(r.page) + "\\"></iframe>";',
 '  }',
 '}',
-'/* ---- global click delegation ---- */',
 'document.addEventListener("click", function(e){',
 '  var nav = e.target.closest(".nav,.tb");',
 '  if (nav && nav.getAttribute("data-tab")) { loadTab(nav.getAttribute("data-tab")); return; }',
@@ -650,4 +692,4 @@ app.get('*', (req, res) => {
   res.type('html').send(HTML);
 });
 
-app.listen(PORT, () => console.log('MovieBox running on ' + PORT));
+app.listen(PORT, () => console.log('MovieBox running on ' + PORT + ' — primary: ' + MB_BASES[0]));
